@@ -1,4 +1,5 @@
 # JAudioSync
+Project in ==very early developement== !
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.
 Syncing NTP time over wireless network first and then start playback at exact choosen time, which then doesn't need network anymore because it depends on system clock.
