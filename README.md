@@ -8,6 +8,7 @@ Using pygame.mixer.sound to load music files into Ram memmory to reduce delay an
 - Using VLC to create a playlist of songs in "./Music"
 - Save Playlist as "./Music/Playlist.m3u8"
 
+## How to run:
 
 JupyterLab with JAudioSync.ipynb is used for developement
 
@@ -16,7 +17,7 @@ In the future you can run:
 python JAudioSync.py
 ```
 
-# Dependencies needed to be installed:
+### Dependencies needed to be installed:
 ```
 pip install pygame
 pip install pydub
