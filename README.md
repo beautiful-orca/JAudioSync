@@ -12,16 +12,16 @@ Using pygame.mixer.sound to load music files into Ram memmory to reduce delay an
 JupyterLab with JAudioSync.ipynb is used for developement
 
 In the future you can run:
-'''
+```
 python JAudioSync.py
-'''
+```
 
 # Dependencies needed to be installed:
-'''
+```
 pip install pygame
 pip install pydub
 pip install apscheduler
-'''
+```
 
 ## Future Ideas
 
