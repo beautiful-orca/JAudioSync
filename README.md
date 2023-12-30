@@ -3,7 +3,7 @@ Project is in **very early developement!** :cowboy_hat_face:
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.
 Syncing NTP time over wireless network first and then start playback at exact choosen time, which then doesn't need network anymore because it depends on system clock.
-Using pygame.mixer.sound to load music files into Ram memmory to reduce delay and variability of playback.
+Using pygame.mixer.sound to load music files into Ram memory to reduce delay and variability of playback.
 
 - Place music fies in "./Music/"
 - Using VLC to create a playlist of songs in "./Music"
