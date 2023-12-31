@@ -1,12 +1,3 @@
-# Place music fies in "./Music/"
-# Using VLC to create a playlist of songs in "./Music"
-# Save Playlist as "./Music/Playlist.m3u8"
-
-# install additional python modules:
-#!pip install pygame
-#!pip install pydub
-#!pip install apscheduler
-
 import sys
 import re
 import os
