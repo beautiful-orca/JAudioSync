@@ -7,11 +7,11 @@ Using pygame.mixer.sound to load music files into Ram memory to reduce delay and
 
 ## How to use  
 
-- git clone https://github.com/beautiful-orca/JAudioSync.git  
-- cd JAudioSync  
-- Place music fies in "./Music/"  
-- Using VLC to create a playlist of songs in "./Music"  
-- Save Playlist as "./Music/Playlist.m3u8"  
+- `git clone https://github.com/beautiful-orca/JAudioSync.git`  
+- `cd JAudioSync`  
+- Place music fies in `./Music/`  
+- Using VLC (or similar music player) to create a playlist of songs in `./Music/`  
+    - Save Playlist as `./Music/Playlist.m3u8`  
 - Run: `python JAudioSync.py 18:55:00`  
     - Argument is the time the playlist should start playing  
     - **For debug purposes, the time is assumed now + 2 seconds**  
