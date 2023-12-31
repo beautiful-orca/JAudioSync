@@ -1,11 +1,11 @@
-# JAudioSync  
+## JAudioSync  
 Project is in **very early developement!** :cowboy_hat_face:  
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.  
 Syncing NTP time over wireless network first and then start playback at exact choosen time, which then doesn't need network anymore because it depends on system clock.  
 Using pygame.mixer.sound to load music files into Ram memory to reduce delay and variability of playback.  
 
-## How to use  
+### How to use  
 
 - `git clone https://github.com/beautiful-orca/JAudioSync.git`  
 - `cd JAudioSync`  
@@ -28,8 +28,15 @@ pip install apscheduler
 ```
 
 
+### ToDo / Future Ideas  
+- Stopping music playback on demand (local possible, remote needs to be implemented)
+- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
 
-## Install and use on (multiple) Raspberry Pi 3  
+- Common interace: distribute commands to all clients at the same time
+   - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
+- Volume control
+
+### Install and use on (multiple) Raspberry Pi 3  
 - Install Pi OS Lite 64bit  
 - Set different Hostnames  
 - Connect to internet for install and update  
@@ -38,14 +45,6 @@ pip install apscheduler
     - Auto-discovery?  
     - NTP Server  
     - Command control server
-
-## ToDo / Future Ideas  
-- Stopping music playback on demand (local possible, remote needs to be implemented)
-- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
-
-- Common interace: distribute commands to all clients at the same time
-   - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
-- Volume control
 
 
 ### Similar Projects
