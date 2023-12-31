@@ -27,11 +27,27 @@ pip install pydub
 pip install apscheduler
 ```
 
-## Future Ideas  
 
+
+## Install and use on (multiple) Raspberry Pi 3  
+- Install Pi OS Lite 64bit  
+- Set different Hostnames  
+- Connect to internet for install and update  
+- Using Central Wifi Access Point, Raspi hotspot or mobile Wifi hotspot?  
+- Server and Client model?  
+    - Auto-discovery?  
+    - NTP Server  
+    - Command control server
+
+## ToDo / Future Ideas  
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
 
 - Common interace: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
+
+
+### Similar Projects
+- [Claudiosync](https://claudiosync.de/)
+    - Announced plans to open-source
