@@ -5,8 +5,10 @@ Play a (m3u8) playlist of music in perfect sync on multiple devices.
 Syncing NTP time over wireless network first and then start playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock.  
 Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
 
-### How to use  
 
+Currently broken because of unfinished argparse rewrite.  
+
+### How to use     
 - `git clone https://github.com/beautiful-orca/JAudioSync.git`  
 - `cd JAudioSync`  
 - Place music fies in [./Music/](./Music/)  
@@ -21,6 +23,7 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 
 
 ### Dependencies needed to be installed  
+I am using Python 3.11.5 with JupyterLab in a Anaconda venv  
 ```
 pip install pygame
 pip install pydub
@@ -36,15 +39,25 @@ pip install apscheduler
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
 
-### Install and use on (multiple) Raspberry Pi 3  
-- Install Pi OS Lite 64bit  
-- Set different Hostnames  
-- Connect to internet for install and update  
+### Install and use on (multiple) Raspberry Pi 3 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
+- Install Pi OS Lite 64bit with Pi Image Flasher
+    - set username and password
+    - Wifi config with internet access or use wired internet for install and update  
+    - Set hostname "leader" and "member[n]"
 - Using Central Wifi Access Point, Raspi hotspot or mobile Wifi hotspot?  
-- Server and Client model?  
-    - Auto-discovery?  
-    - NTP Server  
-    - Command control server
+    - Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
+- Set Hostname in live system (single word, without domain ".local")
+    Replace in: `sudo nano /etc/hostname`
+    `sudo nano /etc/hosts` 
+    (find line that starts with 127.0.1.1 and update the hostname to match the one you set)
+    `sudo reboot`
+    `ping hostname.local`
+
+- Server and Client model  
+    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]"?  
+    - NTP Server on leader
+        - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
+    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames
 
 
 ### Similar Projects

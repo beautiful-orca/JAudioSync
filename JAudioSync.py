@@ -1,6 +1,7 @@
 import sys
 import re
 import os
+import argparse
 import pygame.mixer
 from urllib.parse import unquote
 from datetime import timedelta, datetime
@@ -58,6 +59,39 @@ def is_valid_start_time(start_time):
 
 if __name__ == "__main__":
     
+    # Create ArgumentParser object
+    parser = argparse.ArgumentParser(description="""
+                                    Play a (m3u8) playlist of music in perfect sync on multiple devices.  
+                                    Syncing NTP time over wireless network first and then start playback at exact choosen time (using apscheduler),  
+                                    which then doesn't need network anymore because it depends on system clock.  
+                                    Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
+                                    
+                                    usage: yourscript.py [-h] [--s_time 18:55:00] --pl_pos 1
+                                    """
+                                    )
+    
+    mem_pl_pos = read file mem_pl_pos.txt extract int in first position
+    
+    # Add optional arguments
+    parser.add_argument('--s_time', type=str, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=2)).strftime('%H:%M:%S'))
+    parser.add_argument('--pl_pos', type=int, help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=)
+
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+    # Access the parsed argument
+    start_time = args.s_time
+    pl_posistion = args.pl_pos
+
+    # Check if the argument is provided
+    if your_variable is not None:
+        print("Your variable is:", your_variable)
+    else:
+        print("No value provided for your_variable.")
+        
+        
+    
+    
     if len(sys.argv) != 2:
         print("Argument mismatch, Usage: python JAudioSync.py 18:55:00")
         sys.exit(1)
@@ -87,7 +121,7 @@ if __name__ == "__main__":
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    print("Start Playback at: ", play_time)
+    print("Start Playback at: ", play_time, " Playlist Posotion: ", pl_posistion)
     
     # Create a scheduler
     scheduler = BackgroundScheduler()
@@ -121,3 +155,62 @@ if __name__ == "__main__":
         print("Script interrupted by user.")
         pygame.mixer.quit()
         scheduler.shutdown()
+        
+        
+'''
+argparse
+help='Description of your_variable': Provides a help message for the argument.
+Running the script without the required argument will display an automatically generated help message:
+yourscript.py [-h] your_variable
+
+
+make arguments optional with argparse by specifying their nargs parameter as '?' (zero or one occurrence). Additionally, you can provide default values for optional arguments.
+
+
+import argparse
+
+def main():
+    # Create ArgumentParser object
+    parser = argparse.ArgumentParser(description='Description of your script.')
+
+    # Add optional argument
+    parser.add_argument('--your_variable', type=str, help='Description of your_variable', nargs='?', default='default_value')
+
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+    # Access the parsed argument
+    your_variable = args.your_variable
+
+    # Check if the argument is provided
+    if your_variable is not None:
+        print("Your variable is:", your_variable)
+    else:
+        print("No value provided for your_variable.")
+
+if __name__ == '__main__':
+    main()
+    
+
+You can provide a value:
+python yourscript.py --your_variable hello
+
+You can also provide a default value for the optional argument:
+parser.add_argument('--your_variable', type=str, help='Description of your_variable', nargs='?', default='default_value')
+
+
+The nargs parameter in argparse specifies the number of arguments that should be consumed
+
+An integer: The exact number of arguments expected.
+'?': Zero or one argument.
+'*': Zero or more arguments.
+'+': One or more arguments.
+Here's a brief explanation of each:
+
+An Integer: You can specify a fixed number to indicate how many arguments an option should take. For example, nargs=2 means the option should take two arguments.
+python script.py --coordinates 10 20
+
+'?' (Zero or One): This indicates that the option may take zero or one argument.
+python script.py --optional value
+python script.py
+'''
