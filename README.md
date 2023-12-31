@@ -30,8 +30,8 @@ pip install apscheduler
 ## Future Ideas  
 
 - Stopping music playback on demand (local possible, remote needs to be implemented)
-- Resume playback from any number of track in "playlist" (checking if number is playlist item)
+- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
 
 - Common interace: distribute commands to all clients at the same time
-   - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"
-
+   - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
+- Volume control
