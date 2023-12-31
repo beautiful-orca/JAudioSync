@@ -50,4 +50,4 @@ pip install apscheduler
 
 ### Similar Projects
 - [Claudiosync](https://claudiosync.de/)
-    - Announced plans to open-source
+    - Announced plans to publish soon
