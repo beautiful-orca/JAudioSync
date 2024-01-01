@@ -3,6 +3,7 @@ import re
 import os
 from pathlib import Path
 import argparse
+from functools import partial
 import pygame.mixer
 from urllib.parse import unquote
 from datetime import timedelta, datetime
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 3 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='1', default=1)
+    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='?', default=1)
     parser.add_argument('--resume', action='store_true', help='Resume playback from last saved track number of playlist')
     
     # Parse the command-line arguments

@@ -23,6 +23,25 @@ Currently broken because of unfinished argparse rewrite.
 **Example music with different license is present at ./Music at the moment**  
 - See [./Music/music_license.md](./Music/music_license.md)  
 
+#### Example output:
+```
+Resume flag is not set. Starting a new process.
+Start Playback at:  2024-01-01 22:21:39  Playlist Posotion:  1
+./Music/85166__timbre__75315_oymaldonado_bluesy_rock_guitar3_enveloped_reverbed.mp3
+loaded:  22:21:38.031705
+length:  0:00:10
+playing:  22:21:39.000707
+./Music/102818__timbre__remix-of-41967__reverendblack__rev_loops_metal_guitar_12_brighter_buzzier-old1.mp3
+loaded:  22:21:49.012694
+length:  0:00:11
+playing:  22:21:50.000653
+./Music/485980__timbre__tweaked-version-of-fastdash99s-freesound-484749.mp3
+loaded:  22:22:01.027689
+length:  0:00:10
+playing:  22:22:02.000608
+Playlist finished playing
+```
+
 
 ### Dependencies needed to be installed  
 I am using Python 3.11.5 with JupyterLab in a Anaconda venv  
@@ -33,12 +52,12 @@ pip install apscheduler
 ```
 
 
-### ToDo / Future Ideas  
+### ToDo, Future Ideas, Challenges and Notes  
 
 - Resume after stopping from last played track number
     - needs to write a file after (ending?) playback (or after loading)   
 - Stopping music playback on demand (local possible, remote needs to be implemented)
-- Common interace: distribute commands to all clients at the same time
+- Common interface: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
 - Additional flags for Music path and playlist path
@@ -70,6 +89,9 @@ pip install apscheduler
 - Add DS3231 Real Time Clock Module toavoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 
     - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
+    - Can a GPS clock be a viable option?
+- What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
+    - Tailscale VPN connection for network commands (script control)
 
 ### Use Cases
 [Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
