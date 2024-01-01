@@ -11,6 +11,21 @@ from pydub import AudioSegment
 from math import ceil
 from apscheduler.schedulers.background import BackgroundScheduler
 
+# Read .m3u8 playlist file and extract music file paths to "playlist"
+def load_playlist(playlist_file):
+    try:
+        with playlist_file.open(mode='r') as file:
+            lines = file.readlines()
+            # Filter out comments and empty lines, clean, add ./Music
+        playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
+        if playlist is None:
+            raise ValueError(f"Playlist {playlist_file} is empty.")
+        return playlist
+    except FileNotFoundError:
+        print(f'The playlist file {file_path} is not present.')
+    except Exception as e:
+        print(f'An error occurred: {e}')
+        
 # Validate hh:mm:ss time format for start_time input
 def validate_time_string(time_str):
     # Regular expression to validate the format hh:mm:ss
@@ -36,21 +51,6 @@ def string_to_datetime(time_string):
     datetime_str = f"{today_date} {time_string}"
     return datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
 
-# Read .m3u8 playlist file and extract music file paths to "playlist"
-def load_playlist(playlist_file):
-    try:
-        with playlist_file.open(mode='r') as file:
-            lines = file.readlines()
-            # Filter out comments and empty lines, clean, add ./Music
-        playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
-        if playlist is None:
-            raise ValueError(f"Playlist {playlist_file} is empty.")
-        return playlist
-    except FileNotFoundError:
-        print(f'The playlist file {file_path} is not present.')
-    except Exception as e:
-        print(f'An error occurred: {e}')
-    
 # Get the rounded up playback length of a music file as timedelta (seconds)
 def get_music_length(file_path):
     audio = AudioSegment.from_file(file_path)
@@ -72,12 +72,6 @@ def play_music():
     print("playing: ", datetime.now().time())
     while pygame.mixer.get_busy() == True:
         continue
-
-def is_valid_start_time(start_time):
-    # Get the current time
-    current_time = datetime.now()
-    # Check if start_time is more than 2 seconds from now
-    return start_time > current_time + timedelta(seconds=1)
 
 if __name__ == "__main__":
     
@@ -112,24 +106,8 @@ if __name__ == "__main__":
     start_time_str = args.s_time
     pl_posistion = args.pl_pos
     
-    '''
-    # Check if the argument is provided
-    if your_variable is not None:
-        print("Your variable is:", your_variable)
-    else:
-        print("No value provided for your_variable.")
-    '''
-        
+    # Convert time string to a datetime object
     start_time = string_to_datetime(start_time_str)
-    
-    # debug only
-    start_time = datetime.now().replace(microsecond=0) + timedelta(seconds=2)
-    
-    if not is_valid_start_time(start_time):
-        print("Invalid start time, needs to be more than 1 second in the future, better 1 minute to start script on all devices")
-        sys.exit(1)
-    
-   
     
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
     pygame.mixer.init()
