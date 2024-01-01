@@ -88,17 +88,16 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1]
+                                    usage: yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1] [--resume]
                                     """
                                     )
-    # ToDo
-    # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
-    # update after each track has been played with pygame.mixer.sound.play
+
     
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
     parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=1)
-
+    parser.add_argument('--resume', action='store_true', help='Resume playback from last saved playlist item')
+    
     # Parse the command-line arguments
     args = parser.parse_args()
 
@@ -106,6 +105,18 @@ if __name__ == "__main__":
     start_time_str = args.s_time
     pl_posistion = args.pl_pos
     
+    # Boolean if playback should be resumed
+    resume_flag = args.resume
+    
+    # ToDo
+    # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
+    # update after each track has been played with pygame.mixer.sound.play
+    # Now you can use resume_flag in your script
+    if resume_flag:
+        print("Resume flag is set. Resuming processing.")
+    else:
+        print("Resume flag is not set. Starting a new process.")
+        
     # Convert time string to a datetime object
     start_time = string_to_datetime(start_time_str)
     
