@@ -94,9 +94,9 @@ if __name__ == "__main__":
 
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=1)
-    parser.add_argument('--resume', action='store_true', help='Resume playback from last saved playlist item')
+    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 3 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
+    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='1', default=1)
+    parser.add_argument('--resume', action='store_true', help='Resume playback from last saved track number of playlist')
     
     # Parse the command-line arguments
     args = parser.parse_args()
