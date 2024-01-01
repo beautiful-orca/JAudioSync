@@ -36,14 +36,14 @@ def validate_time_string(time_str):
     return time_str
 
 # Try to convert pl_pos string to int and check if valid playlist position
-def validate_pos_int(pos_int_str, pl_len):
+def validate_pl_pos(pl_len, pos):
     try:
-        pos_int = int(pos_int_str)
-        if 1 <= pos_int <= pl_len:
-            raise ValueError(f"Playlist position out of range. 1 - {pl_len}") 
-        return pos_int - 1
+        pos = int(pos)
+        if not (1 <= pos <= pl_len):
+            raise ValueError(f"Playlist position out of range. Use 1 - {pl_len}") 
+        return pos - 1
     except ValueError:
-        raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos_int_str}.")
+        raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
 
 # Convert time string to a datetime object with date of today
 def string_to_datetime(time_string):
@@ -89,14 +89,14 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1] [--resume]
+                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1] [--resume]
                                     """
                                     )
 
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 3 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='?', default=1)
+    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=5)).strftime('%H:%M:%S'))
+    parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='?', const=0, default=0)
     parser.add_argument('--resume', action='store_true', help='Resume playback from last saved track number of playlist')
     
     # Parse the command-line arguments
@@ -104,7 +104,10 @@ if __name__ == "__main__":
 
     # Access the parsed argument
     start_time_str = args.s_time
-    pl_posistion = args.pl_pos
+    # Convert time string to a datetime object
+    start_time = string_to_datetime(start_time_str)
+    
+    pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
     
     # Boolean if playback should be resumed
     resume_flag = args.resume
@@ -115,18 +118,18 @@ if __name__ == "__main__":
     # Now you can use resume_flag in your script
     if resume_flag:
         print("Resume flag is set. Resuming processing.")
+        #check for umber in stored file and set pl_pos to that
     else:
         print("Resume flag is not set. Starting a new process.")
         
-    # Convert time string to a datetime object
-    start_time = string_to_datetime(start_time_str)
+    
     
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
     pygame.mixer.init()
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    print("Start Playback at: ", play_time, " Playlist Posotion: ", pl_posistion)
+    print("Start Playback at: ", play_time, " Playlist Posotion: ", pl_pos + 1)
     
     # Create a scheduler
     scheduler = BackgroundScheduler()
