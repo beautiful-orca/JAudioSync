@@ -1,6 +1,7 @@
 import sys
 import re
 import os
+from pathlib import Path
 import argparse
 import pygame.mixer
 from urllib.parse import unquote
@@ -10,6 +11,7 @@ from pydub import AudioSegment
 from math import ceil
 from apscheduler.schedulers.background import BackgroundScheduler
 
+# Validate hh:mm:ss time format for start_time input
 def validate_time_string(time_str):
     # Regular expression to validate the format hh:mm:ss
     pattern = re.compile(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$')
@@ -17,14 +19,15 @@ def validate_time_string(time_str):
         raise argparse.ArgumentTypeError(f"Invalid time format: {time_str} , use valid hh:mm:ss")
     return time_str
 
-def validate_pos_int(pos_int_str):
+# Try to convert pl_pos string to int and check if valid playlist position
+def validate_pos_int(pos_int_str, pl_len):
     try:
-        int_value = int(pos_int_str)
-        if int_value < 0:
-            raise ValueError("Playlist position must be greater than 1.")
-        return int_value - 1
+        pos_int = int(pos_int_str)
+        if 1 <= pos_int <= pl_len:
+            raise ValueError(f"Playlist position out of range. 1 - {pl_len}") 
+        return pos_int - 1
     except ValueError:
-        raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos_int_str} .")
+        raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos_int_str}.")
 
 # Convert time string to a datetime object with date of today
 def string_to_datetime(time_string):
@@ -33,14 +36,21 @@ def string_to_datetime(time_string):
     datetime_str = f"{today_date} {time_string}"
     return datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
 
-# Read .m3u8 playlist file and extract file path to "playlist"
+# Read .m3u8 playlist file and extract music file paths to "playlist"
 def load_playlist(playlist_file):
-    with open(playlist_file, 'r') as file:
-        lines = file.readlines()
-    # Filter out comments and empty lines, clean, add ./Music
-    playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
-    return playlist
-
+    try:
+        with playlist_file.open(mode='r') as file:
+            lines = file.readlines()
+            # Filter out comments and empty lines, clean, add ./Music
+        playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
+        if playlist is None:
+            raise ValueError(f"Playlist {playlist_file} is empty.")
+        return playlist
+    except FileNotFoundError:
+        print(f'The playlist file {file_path} is not present.')
+    except Exception as e:
+        print(f'An error occurred: {e}')
+    
 # Get the rounded up playback length of a music file as timedelta (seconds)
 def get_music_length(file_path):
     audio = AudioSegment.from_file(file_path)
@@ -71,10 +81,11 @@ def is_valid_start_time(start_time):
 
 if __name__ == "__main__":
     
-     # Location of .m3u8 playlist file
-    playlist_file = "./Music/Playlist.m3u8"
+    # Location of .m3u8 playlist file
+    playlist_file = Path('./Music/Playlist.m3u8')
     # Create python list of file paths from playlist
     playlist = load_playlist(playlist_file)
+    pl_len = len(playlist)
     
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
@@ -86,12 +97,13 @@ if __name__ == "__main__":
                                     usage: yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1]
                                     """
                                     )
-    
-   # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
+    # ToDo
+    # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
+    # update after each track has been played with pygame.mixer.sound.play
     
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=validate_pos_int, help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=1)
+    parser.add_argument('--pl_pos', type=partial(validate_pos_int, pl_len), help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=1)
 
     # Parse the command-line arguments
     args = parser.parse_args()
