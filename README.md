@@ -41,6 +41,7 @@ pip install apscheduler
 - Common interace: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
+- Additional flags for Music path and playlist path
 - Maybe rename project
 - Move git to privacy friendly hoster?
 
