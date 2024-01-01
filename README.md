@@ -16,7 +16,7 @@ Currently broken because of unfinished argparse rewrite.
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
 - Run: `yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1] [--resume]`  
     - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 3 seconds  
-    - `--pl_pos`, optional: Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1  
+    - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], default: starting from 1  
     - `--resume`, optional: Resume playback from last saved track number of playlist (not ready to use)  
  
 
@@ -35,7 +35,8 @@ pip install apscheduler
 
 ### ToDo / Future Ideas  
 
-- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
+- Resume after stopping from last played track number
+    - needs to write a file after (ending?) playback (or after loading)   
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interace: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
