@@ -10,9 +10,21 @@ from pydub import AudioSegment
 from math import ceil
 from apscheduler.schedulers.background import BackgroundScheduler
 
-def is_valid_time_format(arg):
-    time_pattern = re.compile(r'^[0-2][0-9]:[0-5][0-9]:[0-5][0-9]$')
-    return bool(time_pattern.match(arg))
+def validate_time_string(time_str):
+    # Regular expression to validate the format hh:mm:ss
+    pattern = re.compile(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$')
+    if not pattern.match(time_str):
+        raise argparse.ArgumentTypeError(f"Invalid time format: {time_str} , use valid hh:mm:ss")
+    return time_str
+
+def validate_pos_int(pos_int_str):
+    try:
+        int_value = int(pos_int_str)
+        if int_value < 0:
+            raise ValueError("Playlist position must be greater than 1.")
+        return int_value - 1
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos_int_str} .")
 
 # Convert time string to a datetime object with date of today
 def string_to_datetime(time_string):
@@ -59,6 +71,11 @@ def is_valid_start_time(start_time):
 
 if __name__ == "__main__":
     
+     # Location of .m3u8 playlist file
+    playlist_file = "./Music/Playlist.m3u8"
+    # Create python list of file paths from playlist
+    playlist = load_playlist(playlist_file)
+    
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
                                     Play a (m3u8) playlist of music in perfect sync on multiple devices.  
@@ -66,41 +83,30 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: yourscript.py [-h] [--s_time 18:55:00] --pl_pos 1
+                                    usage: yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1]
                                     """
                                     )
     
-    mem_pl_pos = read file mem_pl_pos.txt extract int in first position
+   # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=str, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=2)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=int, help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=)
+    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss', nargs='?', default=(datetime.now() + timedelta(seconds=3)).strftime('%H:%M:%S'))
+    parser.add_argument('--pl_pos', type=validate_pos_int, help='Number of track in playlist, starting with 1, using last known position saved in flash memory, otherwise starting from 1', nargs='1', default=1)
 
     # Parse the command-line arguments
     args = parser.parse_args()
 
     # Access the parsed argument
-    start_time = args.s_time
+    start_time_str = args.s_time
     pl_posistion = args.pl_pos
-
+    
+    '''
     # Check if the argument is provided
     if your_variable is not None:
         print("Your variable is:", your_variable)
     else:
         print("No value provided for your_variable.")
-        
-        
-    
-    
-    if len(sys.argv) != 2:
-        print("Argument mismatch, Usage: python JAudioSync.py 18:55:00")
-        sys.exit(1)
-        
-    start_time_str = sys.argv[1]
-        
-    if not is_valid_time_format(start_time_str):
-        print("Invalid start time format. Please use the format hh:mm:ss")
-        sys.exit(1)
+    '''
         
     start_time = string_to_datetime(start_time_str)
     
@@ -111,10 +117,7 @@ if __name__ == "__main__":
         print("Invalid start time, needs to be more than 1 second in the future, better 1 minute to start script on all devices")
         sys.exit(1)
     
-    # Location of .m3u8 playlist file
-    playlist_file = "./Music/Playlist.m3u8"
-    # Create python list of file paths from playlist
-    playlist = load_playlist(playlist_file)
+   
     
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
     pygame.mixer.init()

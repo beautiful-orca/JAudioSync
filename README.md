@@ -16,7 +16,7 @@ Currently broken because of unfinished argparse rewrite.
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
 - Run: `python JAudioSync.py 18:55:00`  
     - Argument is the time the playlist should start playing  
-    - **For debug purposes, the time is assumed now + 2 seconds**  
+ 
 
 **Example music with different license is present at ./Music at the moment**  
 - See [./Music/music_license.md](./Music/music_license.md)  
@@ -32,9 +32,9 @@ pip install apscheduler
 
 
 ### ToDo / Future Ideas  
-- Stopping music playback on demand (local possible, remote needs to be implemented)
-- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
 
+- Start (resume after stopping) playback from any number of track in "playlist" (checking if number is playlist item)
+- Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interace: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
