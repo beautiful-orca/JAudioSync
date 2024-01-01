@@ -38,6 +38,8 @@ pip install apscheduler
 - Common interace: distribute commands to all clients at the same time
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
+- Maybe rename project
+- Move git to privacy friendly hoster?
 
 ### Install and use on (multiple) Raspberry Pi 3 
 #### (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
