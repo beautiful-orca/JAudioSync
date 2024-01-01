@@ -39,7 +39,8 @@ pip install apscheduler
    - Alternatively copy prewritten commands (for each client IP) to Termux (needs ssh key auth), e.g ssh 192.10.10.2 python JAudioSync.py "18:55:00"  
 - Volume control
 
-### Install and use on (multiple) Raspberry Pi 3 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
+### Install and use on (multiple) Raspberry Pi 3 
+#### (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
 - Install Pi OS Lite 64bit with Pi Image Flasher
     - set username and password
     - Wifi config with internet access or use wired internet for install and update  
@@ -52,13 +53,23 @@ pip install apscheduler
     (find line that starts with 127.0.1.1 and update the hostname to match the one you set)
     `sudo reboot`
     `ping hostname.local`
-
 - Server and Client model  
     - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]"?  
     - NTP Server on leader
         - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
-    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames
+    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
+- Audio Setup - USB DAC  
+    - ALSA is standard on Raspi?  
+    - Optional: combine audio channels to left channel mono  
+- Add DS3231 Real Time Clock Module toavoid system clock drift when without network connection to NTP Server  
+    - System clock drift needs testing (without network connection) 
+    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
 
+### Use Cases
+[Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
+   - Multiple speakers distributed on Cargo Bikes and trailers
+   - Moving with changing conditions which make a network dependant solution hard or costly to implement (Mesh Wifi problems)
+   - [CM Duisburg](https://criticalmass.in/duisburg)
 
 ### Similar Projects
 - [Claudiosync](https://claudiosync.de/)
