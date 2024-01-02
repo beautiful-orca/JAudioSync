@@ -11,7 +11,7 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 - Place music fies in [./Music/](./Music/)  
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
-- Run: `JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`  
+- Run: `python3 JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`
     - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds  
     - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], or "resume" to resume from last played track, default: starting from 1  
 
@@ -20,7 +20,7 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 
 #### Example output:
 ```
-python JAudioSync.py --s_time 22:21:50 --pl_pos resume
+python3 JAudioSync.py --s_time 22:21:50 --pl_pos resume
 
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
@@ -81,11 +81,11 @@ pip install apscheduler
     - Enable ssh password authentication  
     - `ssh jas@jasl`
     - `sudo apt update & sudo apt upgrade`
+    - `sudo apt install git python3-pygame python3-pydub python3-apscheduler`
     - `python3 --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
-    - `cd JAudioSync` 
-    - install python dependencies
+    - `cd JAudioSync`
     
 ### Configuration in live system
 - Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
