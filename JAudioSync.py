@@ -50,8 +50,9 @@ def read_resume_position(pl_len):
     try:
         with open("./.resume", "r") as file:
             resume_pos = int(file.readline().strip())
-        if not (1 <= resume_pos <= pl_len):
+        if not (0 <= resume_pos <= pl_len):
             raise ValueError()
+        print(f"Resuming with track {resume_pos+1}.")
         return resume_pos
     except (FileNotFoundError, ValueError):
         print(".resume not valid, starting with track 1")
@@ -133,7 +134,7 @@ if __name__ == "__main__":
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    print("Start Playback at: ", play_time, " Playlist Posotion: ", pl_pos + 1)
+    print("Start Playback at: ", play_time, ", Playlist Posotion: ", pl_pos + 1)
     
     # Create a scheduler
     scheduler = BackgroundScheduler()
