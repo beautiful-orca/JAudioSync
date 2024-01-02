@@ -50,7 +50,7 @@ pip install apscheduler
 
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
-   - ssh password auth, common password to add all hostnames found with pattern, eg JASM1, JASM2, JASn
+   - ssh password auth, common password to add all hostnames found with pattern, eg JASM1, JASM2, JASMn
    - key auth from phone (Termux) to leader to control without need for password
 - Additional flags for Music path and Playlist path
 - Maybe rename project
