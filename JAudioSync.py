@@ -1,7 +1,6 @@
 import sys
 import re
 import os
-from pathlib import Path
 import argparse
 from functools import partial
 import pygame.mixer
@@ -15,7 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 # Read .m3u8 playlist file and extract music file paths to "playlist"
 def load_playlist(playlist_file):
     try:
-        with playlist_file.open(mode='r') as file:
+        with open(playlist_file, mode='r') as file:
             lines = file.readlines()
             # Filter out comments and empty lines, clean, add ./Music
         playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
@@ -36,7 +35,9 @@ def validate_time_string(time_str):
     return time_str
 
 # Try to convert pl_pos string to int and check if valid playlist position
-def validate_pl_pos(pl_len, pos):
+def validate_pl_pos(pl_len, resume_pos, pos):
+    if pos.lower() == "resume":
+        return resume_pos
     try:
         pos = int(pos)
         if not (1 <= pos <= pl_len):
@@ -44,6 +45,17 @@ def validate_pl_pos(pl_len, pos):
         return pos - 1
     except ValueError:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
+
+def read_resume_position(pl_len):
+    try:
+        with open("./.resume", "r") as file:
+            resume_pos = int(file.readline().strip())
+        if not (1 <= resume_pos <= pl_len):
+            raise ValueError()
+        return resume_pos
+    except (FileNotFoundError, ValueError):
+        print(".resume not valid, starting with track 1")
+        return 0
 
 # Convert time string to a datetime object with date of today
 def string_to_datetime(time_string):
@@ -68,8 +80,9 @@ def load_music(music_file):
     print("length: ", get_music_length(music_file))
 
 # Start playback of music from RAM memory
-def play_music():
+def play_music(pl_pos):
     music.play()
+    # Write .resume with pl_pos after each track has been played
     print("playing: ", datetime.now().time())
     while pygame.mixer.get_busy() == True:
         continue
@@ -77,11 +90,16 @@ def play_music():
 if __name__ == "__main__":
     
     # Location of .m3u8 playlist file
-    playlist_file = Path('./Music/Playlist.m3u8')
-    # Create python list of file paths from playlist
+    playlist_file = "./Music/Playlist.m3u8"
+    # Create list of file paths from playlist
     playlist = load_playlist(playlist_file)
     pl_len = len(playlist)
-    
+
+    try:
+        resume_pos = read_resume_position(pl_len)
+    except Exception as e:
+        print(f"Error: {e}")
+
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
                                     Play a (m3u8) playlist of music in perfect sync on multiple devices.  
@@ -89,15 +107,16 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1] [--resume]
+                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1 | resume]
                                     """
                                     )
 
     
+    
+    
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=5)).strftime('%H:%M:%S'))
-    parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len), help='Start track number in playlist, 1 - number of tracks in playlist, default: starting from 1', nargs='?', const=0, default=0)
-    parser.add_argument('--resume', action='store_true', help='Resume playback from last saved track number of playlist')
+    parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
     
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -108,22 +127,7 @@ if __name__ == "__main__":
     start_time = string_to_datetime(start_time_str)
     
     pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
-    
-    # Boolean if playback should be resumed
-    resume_flag = args.resume
-    
-    # ToDo
-    # mem_pl_pos = read file mem_pl_pos.txt extract int in first position
-    # update after each track has been played with pygame.mixer.sound.play
-    # Now you can use resume_flag in your script
-    if resume_flag:
-        print("Resume flag is set. Resuming processing.")
-        #check for umber in stored file and set pl_pos to that
-    else:
-        print("Resume flag is not set. Starting a new process.")
-        
-    
-    
+
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
     pygame.mixer.init()
     
@@ -135,15 +139,15 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     
     # Schedule tasks
-    for music_file_path in playlist:
+    for i in range(pl_pos, pl_len):
+        music_file_path = playlist[i]
         # Schedule the task at the specified datetime
         scheduler.add_job(load_music, 'date', run_date=load_time, args=[music_file_path])
-        scheduler.add_job(play_music, 'date', run_date=play_time)
+        scheduler.add_job(play_music, 'date', run_date=play_time, args=[pl_pos])
         music_length = get_music_length(music_file_path)
         load_time = play_time + music_length
         play_time = load_time + timedelta(seconds=1)
-    
-    
+        
     try:
         scheduler.start()
 
