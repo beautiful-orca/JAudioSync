@@ -77,14 +77,14 @@ def load_music(music_file):
     global music
     music = pygame.mixer.Sound(music_file)
     print(music_file)
-    print("loaded: ", datetime.now().time())
-    print("length: ", get_music_length(music_file))
+    print(f"Loaded: {datetime.now().time()}")
+    print("Length: {get_music_length(music_file)}")
 
 # Start playback of music from RAM memory
 def play_music(pl_pos):
     music.play()
     # Write .resume with pl_pos after each track has been played
-    print("playing: ", datetime.now().time())
+    print(f"playing: {datetime.now().time()}")
     while pygame.mixer.get_busy() == True:
         continue
 
@@ -134,7 +134,7 @@ if __name__ == "__main__":
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    print("Start Playback at: ", play_time, ", Playlist Posotion: ", pl_pos + 1)
+    print(f"Start Playback at: {play_time} , Playlist Posotion: {pl_pos + 1}")
     
     # Create a scheduler
     scheduler = BackgroundScheduler()
