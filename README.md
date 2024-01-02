@@ -79,7 +79,14 @@ pip install apscheduler
     - Wifi config with internet access or use wired internet for install and update  
     - Set locale  
     - Enable ssh password authentication  
-
+    - `ssh jas@jasl`
+    - `sudo apt update & sudo apt upgrade`
+    - `python3 --version`
+    - `cd ~/`
+    - ``git clone https://github.com/beautiful-orca/JAudioSync.git`
+    - `cd JAudioSync` 
+    - install python dependencies
+    
 ### Configuration in live system
 - Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
 - Set Hostname in live system (single word, without domain ".local")
