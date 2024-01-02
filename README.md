@@ -5,10 +5,7 @@ Play a (m3u8) playlist of music in perfect sync on multiple devices.
 Syncing NTP time over wireless network first and then start playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock.  
 Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
 
-
-Currently broken because of unfinished argparse rewrite.  
-
-### How to use (may not be up to date)  
+### How to use  
 - `git clone https://github.com/beautiful-orca/JAudioSync.git`  
 - `cd JAudioSync`  
 - Place music fies in [./Music/](./Music/)  
@@ -40,7 +37,6 @@ playing:  22:22:02.000608
 Playlist finished playing
 ```
 
-
 ### Dependencies needed to be installed  
 I am using Python 3.11.5 with JupyterLab in a Anaconda venv  
 ```
@@ -61,7 +57,7 @@ pip install apscheduler
 - Move git to privacy friendly hoster?
 
 ### Install and use on (multiple) Raspberry Pi 3 
-#### (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
+(Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
 - Install Pi OS Lite 64bit with Pi Image Flasher
     - set username and password
     - Wifi config with internet access or use wired internet for install and update  
