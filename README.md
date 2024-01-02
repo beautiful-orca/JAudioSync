@@ -74,13 +74,13 @@ pip install apscheduler
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
 - Install Pi OS Lite 64bit with Raspberry Pi Imager  
     - 3 B+ as leader and 3 A+ as member in my case
-    - Set hostname for "leader" and "member[n]" jasl, jasm1  
+    - Set hostname for "leader" and "member[n]" jasl, jasm1
     - set username and password, jas:secret  
     - Wifi config with internet access or use wired internet for install and update  
     - Set locale  
     - Enable ssh password authentication  
     - `ssh jas@jasl`
-    - `sudo apt update & sudo apt upgrade`
+    - `sudo apt update && sudo apt upgrade`
     - `sudo apt install git python3-pygame python3-pydub python3-apscheduler`
     - `python3 --version`
     - `cd ~/`
