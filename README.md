@@ -83,7 +83,7 @@ pip install apscheduler
     - `sudo apt update & sudo apt upgrade`
     - `python3 --version`
     - `cd ~/`
-    - ``git clone https://github.com/beautiful-orca/JAudioSync.git`
+    - `git clone https://github.com/beautiful-orca/JAudioSync.git`
     - `cd JAudioSync` 
     - install python dependencies
     
