@@ -111,10 +111,7 @@ if __name__ == "__main__":
                                     usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1 | resume]
                                     """
                                     )
-
-    
-    
-    
+  
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=5)).strftime('%H:%M:%S'))
     parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
@@ -122,11 +119,12 @@ if __name__ == "__main__":
     # Parse the command-line arguments
     args = parser.parse_args()
 
-    # Access the parsed argument
+    # Access parsed start time argument
     start_time_str = args.s_time
     # Convert time string to a datetime object
     start_time = string_to_datetime(start_time_str)
     
+    # Access parsed playlist position (including resume position if given) argument
     pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
 
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
