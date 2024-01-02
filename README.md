@@ -50,43 +50,56 @@ pip install apscheduler
 
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
-   - ssh password auth, common password to add all hostnames found with pattern, eg JASM1, JASM2, JASn
+   - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasmn
    - key auth from phone (Termux) to leader to control without need for password
 - Additional flags for Music path and Playlist path
 - Maybe rename project
 - Move git to privacy friendly hoster?
 
+- Using Central Wifi Access Point, Raspi hotspot/mesh or mobile Wifi hotspot?  
+    - What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
+    - Tailscale VPN connection for network commands (script control)
+- Server and Client model  
+    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]"?  
+    - NTP Server on leader
+        - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
+    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
+- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
+    - System clock drift needs testing (without network connection) 
+    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
+    - Can a GPS clock be a viable option?
+
+
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
-- Install Pi OS Lite 64bit with Pi Image Flasher
-    - set username and password
+- Install Pi OS Lite 64bit with Raspberry Pi Imager  
+    - 3 B+ as leader and 3 A+ as member in my case
+    - Set hostname for "leader" and "member[n]" jasl, jasm1  
+    - set username and password, jas:secret  
     - Wifi config with internet access or use wired internet for install and update  
-    - Set hostname "leader" and "member[n]"
-- Using Central Wifi Access Point, Raspi hotspot or mobile Wifi hotspot?  
-    - Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
+    - Set locale  
+    - Enable ssh password authentication  
+    - `ssh jas@jasl`
+    - `sudo apt update & sudo apt upgrade`
+    - `python3 --version`
+    - `cd ~/`
+    - ``git clone https://github.com/beautiful-orca/JAudioSync.git`
+    - `cd JAudioSync` 
+    - install python dependencies
+    
+### Configuration in live system
+- Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
 - Set Hostname in live system (single word, without domain ".local")
     Replace in: `sudo nano /etc/hostname`
     `sudo nano /etc/hosts` 
     (find line that starts with 127.0.1.1 and update the hostname to match the one you set)
     `sudo reboot`
     `ping hostname.local`  
-
-- Server and Client model  
-    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]"?  
-    - NTP Server on leader
-        - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
-    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
 - Audio Setup - USB DAC  
     - ALSA is standard on Raspi?  
     - Optional: combine audio channels to left channel mono  
 - Volume control
     - amixer -c 1 set Speaker 50%
-- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
-    - System clock drift needs testing (without network connection) 
-    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
-    - Can a GPS clock be a viable option?
-- What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
-    - Tailscale VPN connection for network commands (script control)
 
 ### Use Cases
 [Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
