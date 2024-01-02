@@ -23,12 +23,12 @@ Currently broken because of unfinished argparse rewrite.
 
 #### Example output:
 ```
-Resume flag is not set. Starting a new process.
-Start Playback at:  2024-01-01 22:21:39  Playlist Posotion:  1
-./Music/85166__timbre__75315_oymaldonado_bluesy_rock_guitar3_enveloped_reverbed.mp3
-loaded:  22:21:38.031705
-length:  0:00:10
-playing:  22:21:39.000707
+python JAudioSync.py --s_time 22:21:50 --pl_pos resume
+
+pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Resuming with track 2.
+Start Playback at:  2024-01-01 22:21:50 , Playlist Posotion:  2
 ./Music/102818__timbre__remix-of-41967__reverendblack__rev_loops_metal_guitar_12_brighter_buzzier-old1.mp3
 loaded:  22:21:49.012694
 length:  0:00:11
