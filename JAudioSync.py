@@ -50,7 +50,7 @@ def read_resume_position(pl_len):
     try:
         with open("./.resume", "r") as file:
             resume_pos = int(file.readline().strip())
-        if not (0 <= resume_pos <= pl_len):
+        if not (0 <= resume_pos < pl_len):
             raise ValueError()
         print(f"Resuming with track {resume_pos+1}.")
         return resume_pos
@@ -78,12 +78,15 @@ def load_music(music_file):
     music = pygame.mixer.Sound(music_file)
     print(music_file)
     print(f"Loaded: {datetime.now().time()}")
-    print("Length: {get_music_length(music_file)}")
+    print(f"Length: {get_music_length(music_file)}")
 
 # Start playback of music from RAM memory
 def play_music(pl_pos):
     music.play()
-    # Write .resume with pl_pos after each track has been played
+    # Write current pl_pos to .resume file
+    with open("./.resume", 'w') as file:
+        file.write(str(pl_pos))
+    print(f"pl_pos: {pl_pos}")
     print(f"playing: {datetime.now().time()}")
     while pygame.mixer.get_busy() == True:
         continue
@@ -142,7 +145,7 @@ if __name__ == "__main__":
         music_file_path = playlist[i]
         # Schedule the task at the specified datetime
         scheduler.add_job(load_music, 'date', run_date=load_time, args=[music_file_path])
-        scheduler.add_job(play_music, 'date', run_date=play_time, args=[pl_pos])
+        scheduler.add_job(play_music, 'date', run_date=play_time, args=[i])
         music_length = get_music_length(music_file_path)
         load_time = play_time + music_length
         play_time = load_time + timedelta(seconds=1)
