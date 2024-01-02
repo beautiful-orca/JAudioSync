@@ -14,7 +14,7 @@ Currently broken because of unfinished argparse rewrite.
 - Place music fies in [./Music/](./Music/)  
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
-- Run: `yourscript.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`  
+- Run: `JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`  
     - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds  
     - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], or "resume" to resume from last played track, default: starting from 1 (write .resume not ready to use)   
 
