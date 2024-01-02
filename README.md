@@ -73,6 +73,7 @@ pip install apscheduler
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
 - Install Pi OS Lite 64bit with Raspberry Pi Imager  
+    - 3 B+ as leader and 3 A+ as member in my case
     - Set hostname for "leader" and "member[n]" jasl, jasm1  
     - set username and password, jas:secret  
     - Wifi config with internet access or use wired internet for install and update  
