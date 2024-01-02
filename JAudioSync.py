@@ -37,6 +37,7 @@ def validate_time_string(time_str):
 # Try to convert pl_pos string to int and check if valid playlist position
 def validate_pl_pos(pl_len, resume_pos, pos):
     if pos.lower() == "resume":
+        print(f"Resuming with track {resume_pos+1}.")
         return resume_pos
     try:
         pos = int(pos)
@@ -52,7 +53,6 @@ def read_resume_position(pl_len):
             resume_pos = int(file.readline().strip())
         if not (0 <= resume_pos < pl_len):
             raise ValueError()
-        print(f"Resuming with track {resume_pos+1}.")
         return resume_pos
     except (FileNotFoundError, ValueError):
         print(".resume not valid, starting with track 1")
@@ -86,8 +86,8 @@ def play_music(pl_pos):
     # Write current pl_pos to .resume file
     with open("./.resume", 'w') as file:
         file.write(str(pl_pos))
-    print(f"pl_pos: {pl_pos}")
     print(f"playing: {datetime.now().time()}")
+    print(f"Playlist Position: {pl_pos+1}")
     while pygame.mixer.get_busy() == True:
         continue
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    print(f"Start Playback at: {play_time} , Playlist Posotion: {pl_pos + 1}")
+    print(f"Start Playback at: {play_time} , Track Number: {pl_pos + 1}")
     
     # Create a scheduler
     scheduler = BackgroundScheduler()
