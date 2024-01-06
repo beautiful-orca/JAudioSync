@@ -83,7 +83,7 @@ def get_music_length(file_path):
 
 def initialize_mixer():
     # Initializing audio output of pygame.mixer
-    pygame.mixer.init(48000, -16, 2, 256) # frequency, size, channels, buffer
+    pygame.mixer.init(48000, -16, 2, 128) # frequency, size, channels, buffer
 
 # Load a music file into RAM memory with pygame.mixer.Sound, available globally as "music", enabeling fast playback time compared to streaming from storage
 def load_music(music_file):
