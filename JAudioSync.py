@@ -81,6 +81,10 @@ def get_music_length(file_path):
     rounded_length = ceil(length_in_seconds)
     return timedelta(seconds=rounded_length)
 
+def initialize_mixer():
+    # Initializing audio output of pygame.mixer
+    pygame.mixer.init(48000, -16, 2, 256) # frequency, size, channels, buffer
+
 # Load a music file into RAM memory with pygame.mixer.Sound, available globally as "music", enabeling fast playback time compared to streaming from storage
 def load_music(music_file):
     global music
@@ -145,15 +149,18 @@ if __name__ == "__main__":
 
     timezone = args.tz
     
-    # Initializing audio output of pygame.mixer
-    pygame.mixer.init(48000, -16, 2, 1024) # frequency, size, channels, buffer
+    
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
+    init_time = play_time - timedelta(seconds=2)
     print(f"Start Playback at: {play_time} , Track Number: {pl_pos + 1}")
     
     # Create a scheduler
     scheduler = BackgroundScheduler(timezone=timezone)
+    
+    # Schedule mixer init
+    scheduler.add_job(initialize_mixer, 'date', run_date=init_time)
     
     # Schedule tasks
     for i in range(pl_pos, pl_len):
