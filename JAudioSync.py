@@ -83,16 +83,16 @@ def get_music_length(file_path):
 
 # Load a music file into RAM memory with pygame.mixer.Sound, available globally as "music", enabeling fast playback time compared to streaming from storage
 def load_music(music_file):
-    global sound
-    sound = pygame.mixer.Sound(music_file)
-    sound.set_volume(0.5)
+    global music
+    music = pygame.mixer.Sound(music_file)
+    music.set_volume(0.5)
     print(music_file)
     print(f"Loaded: {datetime.now().time()}")
     print(f"Length: {get_music_length(music_file)}")
 
 # Start playback of music from RAM memory
 def play_music(pl_pos):
-    sound.play()
+    music.play()
     # Write current pl_pos to .resume file
     with open("./.resume", 'w') as file:
         file.write(str(pl_pos))
