@@ -153,7 +153,7 @@ if __name__ == "__main__":
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
-    init_time = play_time - timedelta(seconds=2)
+    init_time = play_time - timedelta(seconds=1, milliseconds=500)
     print(f"Start Playback at: {play_time} , Track Number: {pl_pos + 1}")
     
     # Create a scheduler
