@@ -94,7 +94,12 @@ pip install apscheduler
     - `cd JAudioSync`
     
 ### Configuration in live system
-- Wifi configuration: /etc/wpa_supplicant/wpa_supplicant.conf  
+- Wifi configuration: 
+    - sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+        network={
+            ssid="SSID"
+            psk="PASSWORD"
+        }
 - Set Hostname in live system (single word, without domain ".local")
     Replace in: `sudo nano /etc/hostname`
     `sudo nano /etc/hosts` 
