@@ -85,7 +85,7 @@ def get_music_length(file_path):
 def load_music(music_file):
     global music
     music = pygame.mixer.Sound(music_file)
-    music.set_volume(0.5)
+    music.set_volume(0.8)
     print(music_file)
     print(f"Loaded: {datetime.now().time()}")
     print(f"Length: {get_music_length(music_file)}")
