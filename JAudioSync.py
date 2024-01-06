@@ -85,6 +85,7 @@ def get_music_length(file_path):
 def load_music(music_file):
     global music
     music = pygame.mixer.Sound(music_file)
+    pygame.mixer.Sound.set_volume(0.8)
     print(music_file)
     print(f"Loaded: {datetime.now().time()}")
     print(f"Length: {get_music_length(music_file)}")
@@ -145,7 +146,7 @@ if __name__ == "__main__":
     timezone = args.tz
     
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
-    pygame.mixer.pre_init(44100, -16, 2, 512) # frequency, size, channels, buffer
+    pygame.mixer.pre_init(48000, -16, 2, 512) # frequency, size, channels, buffer
     pygame.mixer.init()
     
     play_time = start_time
