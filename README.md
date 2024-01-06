@@ -11,7 +11,7 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 - Place music fies in [./Music/](./Music/)  
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
-- Run: `python3 JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`
+- Run: `python JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`
     - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds  
     - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], or "resume" to resume from last played track, default: starting from 1  
 
@@ -20,7 +20,7 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 
 #### Example output:
 ```
-python3 JAudioSync.py --s_time 22:21:50 --pl_pos resume
+python JAudioSync.py --s_time 22:21:50 --pl_pos resume
 
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
@@ -48,6 +48,11 @@ pip install apscheduler
 
 ### ToDo, Future Ideas, Challenges and Notes  
 
+- Before audio configuration: "ALSA underrun occurred" on Raspberry Pi
+    - maybe increase buffer of pygame.mixer
+    - manually define parameters
+    - pygame.mixer.pre_init(48000, -16, 2, 512) # frequency, size, channels, buffer
+
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
    - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasmn
@@ -60,7 +65,7 @@ pip install apscheduler
     - What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
     - Tailscale VPN connection for network commands (script control)
 - Server and Client model  
-    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]"?  
+    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]")  
     - NTP Server on leader
         - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
     - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
@@ -79,10 +84,10 @@ pip install apscheduler
     - Wifi config with internet access or use wired internet for install and update  
     - Set locale  
     - Enable ssh password authentication  
-    - `ssh jas@jasl`
+    - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git python3-pygame python3-pydub python3-apscheduler`
-    - `python3 --version`
+    - `sudo apt install git python-pygame python-pydub python-apscheduler`
+    - `python --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
     - `cd JAudioSync`
@@ -95,11 +100,64 @@ pip install apscheduler
     (find line that starts with 127.0.1.1 and update the hostname to match the one you set)
     `sudo reboot`
     `ping hostname.local`  
-- Audio Setup - USB DAC  
-    - ALSA is standard on Raspi?  
-    - Optional: combine audio channels to left channel mono  
 - Volume control
     - amixer -c 1 set Speaker 50%
+    - alsamixer (interactive shell)
+
+### Audio Setup
+
+#### Test sounds
+```
+wget https://www.kozco.com/tech/piano2.wav
+aplay piano2.wav
+```
+
+`speaker-test -c 1`
+
+#### Find USB-AUDIO device:
+`aplay -l`
+
+```
+**** List of PLAYBACK Hardware Devices ****
+card 0: Headphones [bcm2835 Headphones], device 0: bcm2835 Headphones [bcm2835 Headphones]
+card 1: Audio [KM_B2 Digital Audio], device 0: USB Audio [USB Audio]
+card 2: vc4hdmi [vc4-hdmi], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
+```
+
+#### Disable onboard audio:
+sudo nano /etc/modprobe.d/alsa-blacklist.conf
+# Add
+blacklist snd_bcm2835
+
+
+##### Set USB Audio as Default Audio Device
+_Not needed if snd_bcm2835 is disabled_
+`sudo nano /usr/share/alsa/alsa.conf
+```
+# Chnage to
+defaults.ctl.card 1
+defaults.pcm.card 1
+```
+
+#### Mono Channel (optional)
+```
+pcm.!default {
+    type plug
+    slave.pcm "mono"
+}
+
+pcm.mono {
+    type route
+    slave.pcm "hw:0"  # Use the appropriate device identifier for your sound card
+    ttable.0.0 1  # Left channel to left channel
+    ttable.1.0 1  # Right channel to left channel
+}
+
+ctl.mono {
+    type hw
+    card 0  # Use the appropriate card number for your sound card
+}
+```
 
 ### Use Cases
 [Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))

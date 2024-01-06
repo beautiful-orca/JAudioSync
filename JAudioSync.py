@@ -52,7 +52,7 @@ def read_resume_position(pl_len):
         with open("./.resume", "r") as file:
             resume_pos = int(file.readline().strip())
         if not (0 <= resume_pos < pl_len):
-            raise ValueError()
+            return 0
         return resume_pos
     except (FileNotFoundError, ValueError):
         print(".resume not valid, starting with track 1")
@@ -131,7 +131,8 @@ if __name__ == "__main__":
     pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
 
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
-    pygame.mixer.init()
+    #pygame.mixer.init()
+    pygame.mixer.pre_init(48000, -16, 2, 512) # frequency, size, channels, buffer
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
