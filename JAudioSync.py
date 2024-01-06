@@ -26,6 +26,19 @@ def load_playlist(playlist_file):
         print(f'The playlist file {file_path} is not present.')
     except Exception as e:
         print(f'An error occurred: {e}')
+
+def get_next_time():    
+    second = datetime.now().second
+    minute = datetime.now().minute
+
+    if second < 30:
+        next_time = datetime.now() + timedelta(minutes=1)
+        next_time = next_time.replace(second=0,  microsecond=0).strftime('%H:%M:%S')
+
+    if second > 30:
+        next_time = datetime.now() + timedelta(minutes=1)
+        next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
+    return next_time
         
 # Validate hh:mm:ss time format for start_time input
 def validate_time_string(time_str):
@@ -110,6 +123,9 @@ if __name__ == "__main__":
     pl_len = len(playlist)
 
     local_timezone = time.tzname[time.localtime().tm_isdst]
+    next_time = get_next_time()
+    
+    
     
     try:
         resume_pos = read_resume_position(pl_len)
@@ -128,7 +144,7 @@ if __name__ == "__main__":
                                     )
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 10 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=10)).strftime('%H:%M:%S'))
+    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', default=next_time)
     parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
     parser.add_argument('--tz', type=is_valid_timezone, help='Choose timezone, default: system timezone', nargs='?', const=local_timezone, default=local_timezone)
 
@@ -147,7 +163,7 @@ if __name__ == "__main__":
     
     # Initializing audio output of pygame.mixer
     #pygame.mixer.init(48000, -16, 2, 128) # frequency, size, channels, buffer
-    pygame.mixer.init(buffer=128)
+    pygame.mixer.init(buffer=512)
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
