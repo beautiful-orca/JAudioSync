@@ -12,8 +12,9 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
 - Run: `python JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`
-    - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds  
+    - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 10 seconds  
     - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], or "resume" to resume from last played track, default: starting from 1  
+    - `--tz` , optional: Choose timezone, default: system timezone
 
 **Example music with different license is present at ./Music at the moment**  
 - See [./Music/music_license.md](./Music/music_license.md)  

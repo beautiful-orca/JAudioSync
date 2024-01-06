@@ -128,7 +128,7 @@ if __name__ == "__main__":
                                     )
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=5)).strftime('%H:%M:%S'))
+    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 10 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=10)).strftime('%H:%M:%S'))
     parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
     parser.add_argument('--tz', type=is_valid_timezone, help='Choose timezone, default: system timezone', nargs='?', const=local_timezone, default=local_timezone)
 
