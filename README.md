@@ -95,17 +95,10 @@ pip install apscheduler
     
 ### Configuration in live system
 - Wifi configuration: 
-    - sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
-        network={
-            ssid="SSID"
-            psk="PASSWORD"
-        }
+    - use `sudo raspi-config`
 - Set Hostname in live system (single word, without domain ".local")
-    Replace in: `sudo nano /etc/hostname`
-    `sudo nano /etc/hosts` 
-    (find line that starts with 127.0.1.1 and update the hostname to match the one you set)
-    `sudo reboot`
-    `ping hostname.local`  
+    - use `sudo raspi-config`
+    - `ping hostname.local`  
 - Volume control
     - amixer -c 1 set Speaker 50%
     - alsamixer (interactive shell)
