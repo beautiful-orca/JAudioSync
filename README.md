@@ -125,16 +125,18 @@ card 2: vc4hdmi [vc4-hdmi], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
 ```
 
 #### Disable onboard audio:
-sudo nano /etc/modprobe.d/alsa-blacklist.conf
+`sudo nano /etc/modprobe.d/alsa-blacklist.conf`
+```
 # Add
 blacklist snd_bcm2835
-
+```
 
 ##### Set USB Audio as Default Audio Device
 _Not needed if snd_bcm2835 is disabled_
-`sudo nano /usr/share/alsa/alsa.conf
+`sudo nano /usr/share/alsa/alsa.conf`  
+
 ```
-# Chnage to
+# Change to
 defaults.ctl.card 1
 defaults.pcm.card 1
 ```
