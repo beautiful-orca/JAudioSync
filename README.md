@@ -6,7 +6,7 @@ Syncing NTP time over wireless network first and then start playback at exact ch
 Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
 
 
-### Sadly it is too resource heavy to run on Raspberry Pi 3A+ 1G 
+**Sadly it is too resource heavy to run on Raspberry Pi 3A+ 1G**
 
 
 ### How to use  
