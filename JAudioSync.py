@@ -146,7 +146,8 @@ if __name__ == "__main__":
     timezone = args.tz
     
     # Initializing audio output of pygame.mixer
-    pygame.mixer.init(48000, -16, 2, 128) # frequency, size, channels, buffer
+    #pygame.mixer.init(48000, -16, 2, 128) # frequency, size, channels, buffer
+    pygame.mixer.init(buffer=128)
     
     play_time = start_time
     load_time = play_time - timedelta(seconds=1)
