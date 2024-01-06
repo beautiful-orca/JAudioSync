@@ -3,6 +3,7 @@ import re
 import os
 import argparse
 from functools import partial
+import pytz
 import pygame.mixer
 from urllib.parse import unquote
 from datetime import timedelta, datetime
@@ -46,6 +47,14 @@ def validate_pl_pos(pl_len, resume_pos, pos):
         return pos - 1
     except ValueError:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
+
+def is_valid_timezone(tz):
+    try:
+        pytz.timezone(tz)
+        return tz
+    except pytz.UnknownTimeZoneError:
+        raise argparse.ArgumentTypeError(f'{tz} is not a valid timezone.')
+
 
 def read_resume_position(pl_len):
     try:
@@ -99,6 +108,8 @@ if __name__ == "__main__":
     playlist = load_playlist(playlist_file)
     pl_len = len(playlist)
 
+    local_timezone = time.tzname[time.localtime().tm_isdst]
+    
     try:
         resume_pos = read_resume_position(pl_len)
     except Exception as e:
@@ -111,14 +122,15 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1 | resume]
+                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1 | resume] [--tz CET]
                                     """
                                     )
-  
+    
     # Add optional arguments
     parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: now + 5 seconds', nargs='?', default=(datetime.now() + timedelta(seconds=5)).strftime('%H:%M:%S'))
     parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
-    
+    parser.add_argument('--tz', type=is_valid_timezone, help='Choose timezone, default: system timezone', nargs='?', const=local_timezone, default=local_timezone)
+
     # Parse the command-line arguments
     args = parser.parse_args()
 
@@ -130,6 +142,8 @@ if __name__ == "__main__":
     # Access parsed playlist position (including resume position if given) argument
     pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
 
+    timezone = args.tz
+    
     # Initializing audio output of pygame.mixer, detects mode automatically, using standard audio interface
     pygame.mixer.pre_init(44100, -16, 2, 512) # frequency, size, channels, buffer
     pygame.mixer.init()
@@ -139,7 +153,7 @@ if __name__ == "__main__":
     print(f"Start Playback at: {play_time} , Track Number: {pl_pos + 1}")
     
     # Create a scheduler
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(timezone=timezone)
     
     # Schedule tasks
     for i in range(pl_pos, pl_len):
