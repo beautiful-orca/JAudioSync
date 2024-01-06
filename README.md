@@ -53,11 +53,14 @@ pip install apscheduler
 
 ### ToDo, Future Ideas, Challenges and Notes  
 
-- Before audio configuration: "ALSA underrun occurred" on Raspberry Pi
-    - maybe increase buffer of pygame.mixer
-    - manually define parameters
-    - pygame.mixer.pre_init(48000, -16, 2, 512) # frequency, size, channels, buffer
+- Reduce resource demand
+    - BlockingScheduler
+    - Simplify to use one job per load/play
+    - prepare playlist to dictionary before
+    - prefill parameters
+    - ad-hoc scheduling
 
+- Before playing (silent): "ALSA underrun occurred" on Raspberry Pi 3B
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
    - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasmn
