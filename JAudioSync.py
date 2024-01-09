@@ -10,22 +10,9 @@ from datetime import timedelta, datetime
 import time
 from pydub import AudioSegment
 from math import ceil
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.blocking import BlockingScheduler
+import pandas as pd
 
-# Read .m3u8 playlist file and extract music file paths to "playlist"
-def load_playlist(playlist_file):
-    try:
-        with open(playlist_file, mode='r') as file:
-            lines = file.readlines()
-            # Filter out comments and empty lines, clean, add ./Music
-        playlist = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
-        if playlist is None:
-            raise ValueError(f"Playlist {playlist_file} is empty.")
-        return playlist
-    except FileNotFoundError:
-        print(f'The playlist file {file_path} is not present.')
-    except Exception as e:
-        print(f'An error occurred: {e}')
 
 def get_next_time():    
     second = datetime.now().second
@@ -50,14 +37,14 @@ def validate_time_string(time_str):
 
 # Try to convert pl_pos string to int and check if valid playlist position
 def validate_pl_pos(pl_len, resume_pos, pos):
-    if pos.lower() == "resume":
-        print(f"Resuming with track {resume_pos+1}.")
+    if pos.lower() == "res":
+        print(f"Resuming with track {resume_pos}.")
         return resume_pos
     try:
         pos = int(pos)
-        if not (1 <= pos <= pl_len):
-            raise ValueError(f"Playlist position out of range. Use 1 - {pl_len}") 
-        return pos - 1
+        if not (0 <= pos < pl_len):
+            raise ValueError(f"Playlist position out of range. Use 0 - {pl_len - 1}") 
+        return pos
     except ValueError:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
 
@@ -77,7 +64,7 @@ def read_resume_position(pl_len):
             return 0
         return resume_pos
     except (FileNotFoundError, ValueError):
-        print(".resume not valid, starting with track 1")
+        print(f".resume not valid, 0 - {pl_len - 1}")
         return 0
 
 # Convert time string to a datetime object with date of today
@@ -94,38 +81,53 @@ def get_music_length(file_path):
     rounded_length = ceil(length_in_seconds)
     return timedelta(seconds=rounded_length)
 
+# Read .m3u8 playlist file and extract music file paths to "playlist"
+def load_playlist(playlist_file):
+    try:
+        with open(playlist_file, mode='r') as file:
+            lines = file.readlines()
+            # Filter out comments and empty lines, clean, add ./Music
+        path = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
+        if playlist is None:
+            raise ValueError(f"Playlist {playlist_file} is empty.")
+        return playlist
+    except FileNotFoundError:
+        print(f'The playlist file {file_path} is not present.')
+    except Exception as e:
+        print(f'An error occurred: {e}')
+
+def pl_fill_start_times(start_times, path, pl_pos, pl_len):
+    for i in range(pl_pos+1,pl_len-1):
+        s =  start_times[i-1] + get_music_length(path[i-1]) + timedelta(seconds=1)
+        start_times.append(s)
+    df = pd.DataFrame({'Path': path[pl_pos:], 'StartTime': start_times})
+    return df
+
 # Load a music file into RAM memory with pygame.mixer.Sound, available globally as "music", enabeling fast playback time compared to streaming from storage
-def load_music(music_file):
+def load_music(pos, df):
     global music
-    music = pygame.mixer.Sound(music_file)
+    music = pygame.mixer.Sound(df.loc[pos, "Path"])
     music.set_volume(0.8)
-    print(music_file)
-    print(f"Loaded: {datetime.now().time()}")
-    print(f"Length: {get_music_length(music_file)}")
+    with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
+        file.write(str(pl_pos))
 
 # Start playback of music from RAM memory
-def play_music(pl_pos):
+def play_music(music, pl, i, pl_pos):
     music.play()
-    # Write current pl_pos to .resume file
-    with open("./.resume", 'w') as file:
-        file.write(str(pl_pos))
-    print(f"playing: {datetime.now().time()}")
-    print(f"Playlist Position: {pl_pos+1}")
+    
     while pygame.mixer.get_busy() == True:
         continue
+    pl_pos += 1
+    load_music(i, pl)
+
 
 if __name__ == "__main__":
-    
-    # Location of .m3u8 playlist file
-    playlist_file = "./Music/Playlist.m3u8"
-    # Create list of file paths from playlist
-    playlist = load_playlist(playlist_file)
-    pl_len = len(playlist)
-
-    local_timezone = time.tzname[time.localtime().tm_isdst]
+    playlist_file = "./Music/Playlist.m3u8" # Location of .m3u8 playlist file
+    path = load_playlist(playlist_file)
+    pl_len = len(path)
+    timezone = time.tzname[time.localtime().tm_isdst]
     next_time = get_next_time()
-    
-    
+    start_times = []
     
     try:
         resume_pos = read_resume_position(pl_len)
@@ -139,49 +141,31 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
                                     
-                                    usage: JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1 | resume] [--tz CET]
+                                    usage: JAudioSync.py [-h] [--t 18:55:00] [--p 0 | res]
                                     """
                                     )
     
     # Add optional arguments
-    parser.add_argument('--s_time', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', default=next_time)
-    parser.add_argument('--pl_pos', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [1 - number of tracks], or "resume" to resume from last played track, default: starting from 1', nargs='?', const=0, default=0)
-    parser.add_argument('--tz', type=is_valid_timezone, help='Choose timezone, default: system timezone', nargs='?', const=local_timezone, default=local_timezone)
+    parser.add_argument('--t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', default=next_time)
+    parser.add_argument('--p', type=partial(validate_pl_pos, pl_len, resume_pos), help='Start track number in playlist [0 - number of tracks], or "resume" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
 
-    # Parse the command-line arguments
-    args = parser.parse_args()
+    args = parser.parse_args()  # Parse the command-line arguments
+    start_time_str = args.t # Access parsed start time argument
+    start_time = string_to_datetime(start_time_str) # Convert time string to a datetime object
+    start_times.append(start_time)
+    global pl_pos
+    pl_pos = args.p # Access parsed playlist position, starting with 0
+    
+    scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
+    
+    pl = pl_fill_start_times(start_times, path, pl_pos, pl_len)
+    
+    load_music(0, pl)
+    
+    for i in range(0, pl.shape[0]):
+        scheduler.add_job(play_music, 'date', run_date=df.loc[i, 'StartTime'], args=[music, pl, i, pl_pos])
 
-    # Access parsed start time argument
-    start_time_str = args.s_time
-    # Convert time string to a datetime object
-    start_time = string_to_datetime(start_time_str)
-    
-    # Access parsed playlist position (including resume position if given) argument
-    pl_pos = args.pl_pos # 0-2, user facing numbers is 1-3 ( +1 for printing to user)
-
-    timezone = args.tz
-    
-    # Initializing audio output of pygame.mixer
-    #pygame.mixer.init(48000, -16, 2, 128) # frequency, size, channels, buffer
-    pygame.mixer.init(buffer=512)
-    
-    play_time = start_time
-    load_time = play_time - timedelta(seconds=1)
-    print(f"Start Playback at: {play_time} , Track Number: {pl_pos + 1}")
-    
-    # Create a scheduler
-    scheduler = BackgroundScheduler(timezone=timezone)
-    
-    # Schedule tasks
-    for i in range(pl_pos, pl_len):
-        music_file_path = playlist[i]
-        # Schedule the task at the specified datetime
-        scheduler.add_job(load_music, 'date', run_date=load_time, args=[music_file_path])
-        scheduler.add_job(play_music, 'date', run_date=play_time, args=[i])
-        music_length = get_music_length(music_file_path)
-        load_time = play_time + music_length
-        play_time = load_time + timedelta(seconds=1)
-        
+    # not adapted to blocking scheduler?
     try:
         scheduler.start()
 
