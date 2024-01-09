@@ -58,10 +58,9 @@ pip install apscheduler
 
 - Reduce resource demand
     - BlockingScheduler
-    - Simplify to use one job per load/play
-    - prepare playlist to dictionary before
-    - prefill parameters
-    - ad-hoc scheduling
+    - prepare playlist to dataframe
+    - pygame.mixer.init [samplerate/resample]
+    - pygame.mixer.music [streammusic from file] 
 
 - Before playing (silent): "ALSA underrun occurred" on Raspberry Pi 3B
 - Stopping music playback on demand (local possible, remote needs to be implemented)
