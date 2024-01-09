@@ -161,7 +161,8 @@ if __name__ == "__main__":
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
     pl = pl_fill_start_times(start_times, path, pl_pos, pl_len)
-    
+
+    pygame.mixer.init(buffer=512)
     load_music(0, pl)
     
     for i in range(0, pl.shape[0]):
