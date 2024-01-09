@@ -53,6 +53,9 @@ pip install apscheduler
 
 ### ToDo, Future Ideas, Challenges and Notes  
 
+- GPS Time Sync
+    - https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network
+
 - Reduce resource demand
     - BlockingScheduler
     - Simplify to use one job per load/play
