@@ -13,7 +13,6 @@ from math import ceil
 from apscheduler.schedulers.blocking import BlockingScheduler
 import pandas as pd
 
-
 def get_next_time():    
     second = datetime.now().second
     minute = datetime.now().minute
@@ -97,7 +96,7 @@ def load_playlist(playlist_file):
         print(f'An error occurred: {e}')
 
 def pl_fill_start_times(start_times, path, pl_pos, pl_len):
-    for i in range(pl_pos+1,pl_len-1):
+    for i in range(pl_pos+1,pl_len):
         s =  start_times[i-1] + get_music_length(path[i-1]) + timedelta(seconds=1)
         start_times.append(s)
     df = pd.DataFrame({'Path': path[pl_pos:], 'StartTime': start_times})
@@ -114,12 +113,15 @@ def load_music(pos, df):
 # Start playback of music from RAM memory
 def play_music(music, pl, i, pl_pos):
     music.play()
-    
     while pygame.mixer.get_busy() == True:
         continue
     pl_pos += 1
-    load_music(i, pl)
+    load_music(i+1, pl)
 
+def end():
+    scheduler.shutdown()
+    pygame.mixer.quit()
+    print("Playlist finished playing")
 
 if __name__ == "__main__":
     playlist_file = "./Music/Playlist.m3u8" # Location of .m3u8 playlist file
@@ -163,26 +165,11 @@ if __name__ == "__main__":
     load_music(0, pl)
     
     for i in range(0, pl.shape[0]):
-        scheduler.add_job(play_music, 'date', run_date=df.loc[i, 'StartTime'], args=[music, pl, i, pl_pos])
+        scheduler.add_job(play_music, 'date', run_date=pl.loc[i, 'StartTime'], args=[music, pl, i, pl_pos])
 
-    # not adapted to blocking scheduler?
     try:
         scheduler.start()
-
-        while True:
-            # Check if there are any jobs
-            if not scheduler.get_jobs():
-                break
-
-            time.sleep(1)
-
-        # Shut down the scheduler and mixer when done
-        scheduler.shutdown()
-        pygame.mixer.quit()
-        print("Playlist finished playing")
-
+        if(pl_pos >= pl.shape[0]):
+            end()
     except (KeyboardInterrupt, SystemExit):
-        print("Script interrupted by user.")
-        pygame.mixer.quit()
-        scheduler.shutdown()
-        
+        pass
