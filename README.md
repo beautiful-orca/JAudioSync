@@ -27,7 +27,7 @@ Syncing NTP time over wireless network first and then scheduling pygame.mixer.mu
     - `--p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
 
 ### Dependencies needed to be installed  
-I am using Python 3.11.5 with in a anaconda venv  
+I am using Python 3.11.5 in a anaconda venv  
 ```
 pip install pygame
 pip install pydub
