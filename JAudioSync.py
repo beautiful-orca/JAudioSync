@@ -24,8 +24,8 @@ def get_next_time():
         next_time = datetime.now() + timedelta(minutes=1)
         next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
     # debug
-    next_time = datetime.now() + timedelta(seconds=10)
-    next_time = next_time.replace(microsecond=0).strftime('%H:%M:%S')
+    #next_time = datetime.now() + timedelta(seconds=10)
+    #next_time = next_time.replace(microsecond=0).strftime('%H:%M:%S')
     return next_time
 
 # Validate hh:mm:ss time format for start_time input
