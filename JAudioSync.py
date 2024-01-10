@@ -24,8 +24,11 @@ def get_next_time():
     if second > 30:
         next_time = datetime.now() + timedelta(minutes=1)
         next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
+    # debug
+    next_time = datetime.now() + timedelta(seconds=5)
+    next_time = next_time.replace(microsecond=0).strftime('%H:%M:%S')
     return next_time
-        
+
 # Validate hh:mm:ss time format for start_time input
 def validate_time_string(time_str):
     # Regular expression to validate the format hh:mm:ss
@@ -53,7 +56,6 @@ def is_valid_timezone(tz):
         return tz
     except pytz.UnknownTimeZoneError:
         raise argparse.ArgumentTypeError(f'{tz} is not a valid timezone.')
-
 
 def read_resume_position(pl_len):
     try:
@@ -87,52 +89,71 @@ def load_playlist(playlist_file):
             lines = file.readlines()
             # Filter out comments and empty lines, clean, add ./Music
         path = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
-        if playlist is None:
+        if path is None:
             raise ValueError(f"Playlist {playlist_file} is empty.")
-        return playlist
+        return pd.DataFrame({'Path': path})
     except FileNotFoundError:
         print(f'The playlist file {file_path} is not present.')
     except Exception as e:
         print(f'An error occurred: {e}')
 
-def pl_fill_start_times(start_times, path, pl_pos, pl_len):
-    for i in range(pl_pos+1,pl_len):
-        s =  start_times[i-1] + get_music_length(path[i-1]) + timedelta(seconds=1)
-        start_times.append(s)
-    df = pd.DataFrame({'Path': path[pl_pos:], 'StartTime': start_times})
-    return df
 
-# Load a music file into RAM memory with pygame.mixer.Sound, available globally as "music", enabeling fast playback time compared to streaming from storage
-def load_music(pos, df):
-    global music
-    music = pygame.mixer.Sound(df.loc[pos, "Path"])
-    music.set_volume(0.8)
-    with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
-        file.write(str(pl_pos))
+
+# Load a music file with pygame.mixer.music
+def load_music(path):
+    pygame.mixer.music.load(path)
+    pygame.mixer.music.set_volume(0.8)
 
 # Start playback of music from RAM memory
-def play_music(music, pl, i, pl_pos):
-    music.play()
+def play_music(pl_pos):
+    pygame.mixer.music.play()
     while pygame.mixer.get_busy() == True:
         continue
+    with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
+        file.write(str(pl_pos))
     pl_pos += 1
-    load_music(i+1, pl)
 
 def end():
     scheduler.shutdown()
     pygame.mixer.quit()
     print("Playlist finished playing")
 
+def pl_fill_times(pl, start_time, pl_start, pl_len):
+    load_times = []
+    start_times = []
+    lengths = []
+    
+    load_time = start_time - timedelta(seconds=1)
+    load_times.append(load_time)
+    start_times.append(start_time)
+    lengths.append(get_music_length(pl.at[pl_start, 'Path']))
+    
+    for i in range(pl_start + 1, pl_len):
+        le = get_music_length(pl.at[i, 'Path'])
+        l = start_times[i-1] + le
+        s = l + timedelta(seconds=1)
+        load_times.append(l)
+        start_times.append(s)
+        lengths.append(le)
+
+    times = pd.DataFrame({'LoadTime': load_times, 'StartTime': start_times, 'Length': lengths}, index=range(pl_start, pl_start + len(load_times)))            
+    pl = pd.concat([pl, times], axis=1)
+    return pl
+
 if __name__ == "__main__":
     playlist_file = "./Music/Playlist.m3u8" # Location of .m3u8 playlist file
-    path = load_playlist(playlist_file)
-    pl_len = len(path)
+    pl = load_playlist(playlist_file)
+    print(f"paths: {pl}")
+    pl_len = pl.shape[0]
+    print(f"pl_len: {pl_len}")
     timezone = time.tzname[time.localtime().tm_isdst]
     next_time = get_next_time()
-    start_times = []
+    print(f"next_time: {next_time}")
+    
     
     try:
         resume_pos = read_resume_position(pl_len)
+        print(f"resume_pos: {resume_pos}")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -141,7 +162,7 @@ if __name__ == "__main__":
                                     Play a (m3u8) playlist of music in perfect sync on multiple devices.  
                                     Syncing NTP time over wireless network first and then start playback at exact choosen time (using apscheduler),  
                                     which then doesn't need network anymore because it depends on system clock.  
-                                    Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
+                                    Using pygame.mixer.music to play.
                                     
                                     usage: JAudioSync.py [-h] [--t 18:55:00] [--p 0 | res]
                                     """
@@ -154,19 +175,22 @@ if __name__ == "__main__":
     args = parser.parse_args()  # Parse the command-line arguments
     start_time_str = args.t # Access parsed start time argument
     start_time = string_to_datetime(start_time_str) # Convert time string to a datetime object
-    start_times.append(start_time)
-    global pl_pos
     pl_pos = args.p # Access parsed playlist position, starting with 0
+    pl_start = pl_pos
     
+    pl = pl_fill_times(pl, start_time, pl_start, pl_len)
+    print(pl)
+    
+'''
+    pygame.mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
-    pl = pl_fill_start_times(start_times, path, pl_pos, pl_len)
-
-    pygame.mixer.init(buffer=512)
-    load_music(0, pl)
-    
-    for i in range(0, pl.shape[0]):
-        scheduler.add_job(play_music, 'date', run_date=pl.loc[i, 'StartTime'], args=[music, pl, i, pl_pos])
+    for i in range(pl_start, pl_len - 1):
+        path = pl.at[i, "Path"]
+        load_time = pl.at[i, 'LoadTime']
+        start_time = pl.at[i, 'StartTime']
+        scheduler.add_job(load_music, 'date', run_date=load_time, args=[path])
+        scheduler.add_job(play_music, 'date', run_date=start_time, args=[pl_pos])
 
     try:
         scheduler.start()
@@ -174,3 +198,4 @@ if __name__ == "__main__":
             end()
     except (KeyboardInterrupt, SystemExit):
         pass
+'''
