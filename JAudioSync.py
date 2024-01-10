@@ -3,7 +3,7 @@ import re
 import os
 import argparse
 from functools import partial
-import pygame.mixer
+from pygame import mixer
 from urllib.parse import unquote
 from datetime import timedelta, datetime
 import time
@@ -93,20 +93,20 @@ def load_playlist(playlist_file):
 # Load a music file with pygame.mixer.music
 def load_music(path, pl_pos):
     pl_pos += 1
-    pygame.mixer.music.load(path)
-    #pygame.mixer.music.set_volume(0.8)
+    mixer.music.load(path)
+    #mixer.music.set_volume(0.8)
 
 # Start playback of music from RAM memory
 def play_music():
-    pygame.mixer.music.play()
-    while pygame.mixer.get_busy() == True:
+    mixer.music.play()
+    while mixer.get_busy() == True:
         continue
 
 def end(pl_pos):
     with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
         file.write(str(pl_pos))
     scheduler.shutdown()
-    pygame.mixer.quit()
+    mixer.quit()
     print("Playlist finished playing")
 
 def pl_fill_times(pl, start_time, pl_start, pl_len):
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     print(f"pl: {pl}")
     
 
-    pygame.mixer.init()
+    mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
     for i in range(pl_start, pl_len):
