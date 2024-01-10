@@ -3,7 +3,6 @@ import re
 import os
 import argparse
 from functools import partial
-import pytz
 import pygame.mixer
 from urllib.parse import unquote
 from datetime import timedelta, datetime
@@ -62,15 +61,6 @@ def validate_pl_pos(pl_len, pos):
     except ValueError:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
 
-def is_valid_timezone(tz):
-    try:
-        pytz.timezone(tz)
-        return tz
-    except pytz.UnknownTimeZoneError:
-        raise argparse.ArgumentTypeError(f'{tz} is not a valid timezone.')
-
-
-
 # Convert time string to a datetime object with date of today
 def string_to_datetime(time_string):
     format_str = "%H:%M:%S"
@@ -80,7 +70,7 @@ def string_to_datetime(time_string):
 
 # Get the rounded up playback length of a music file as timedelta (seconds)
 def get_music_length(file_path):
-    audio = AudioSegment.from_file(file_path)
+    audio = AudioSegment.from_mp3(file_path)
     length_in_seconds = len(audio) / 1000  # Convert milliseconds to seconds
     rounded_length = ceil(length_in_seconds)
     return timedelta(seconds=rounded_length)
