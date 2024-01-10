@@ -26,14 +26,6 @@ Syncing NTP time over wireless network first and then scheduling pygame.mixer.mu
     - `--t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
     - `--p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
 
-### Dependencies needed to be installed  
-I am using Python 3.11.5 in a anaconda venv  
-```
-pip install pygame
-pip install pydub
-pip install apscheduler
-```
-
 ### ToDo, Future Ideas, Challenges and Notes  
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 
@@ -60,7 +52,12 @@ pip install apscheduler
         - might sync time from internet (mobile (phone) wifi hotspot with 4G internet), de.pool.ntp.org
     - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
 
-
+### Dependencies needed to be installed  
+I am using Python 3.11.5 in a anaconda venv  
+- [pygame](https://www.pygame.org/docs/ref/mixer.html)
+- [pydub](https://github.com/jiaaro/pydub)
+   - [needs ffmpeg](http://www.ffmpeg.org/)
+- [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
 
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
@@ -73,7 +70,7 @@ pip install apscheduler
     - Enable ssh password authentication  
     - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git python-pygame python-pydub python-apscheduler`
+    - `sudo apt install git ffmpeg python3-pygame python3-pydub python3-apscheduler`
     - `python --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
