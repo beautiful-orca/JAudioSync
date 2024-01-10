@@ -2,9 +2,7 @@
 Project is in **very early developement!** :cowboy_hat_face:  
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.  
-Syncing NTP time over wireless network first and then start playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock.  
-Using pygame.mixer.sound to load music files into Ram memory before playback to reduce delay and variability.  
-
+Syncing NTP time over wireless network first and then scheduling pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.
 
 **Sadly it is too resource heavy to run on Raspberry Pi 3A+ 1G**
 
