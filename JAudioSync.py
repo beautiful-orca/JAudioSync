@@ -91,8 +91,11 @@ def load_playlist(playlist_file):
         print(f'An error occurred: {e}')
 
 # Load a music file with pygame.mixer.music
-def load_music(path, pl_pos):
+def load_music(path):
+    global pl_pos
+    print(f"pl_pos: {pl_pos}")
     pl_pos += 1
+    print(f"pl_pos: {pl_pos}")
     mixer.music.load(path)
     #mixer.music.set_volume(0.8)
 
@@ -162,7 +165,7 @@ if __name__ == "__main__":
         path = pl.at[i, "Path"]
         load_time = pl.at[i, 'LoadTime']
         start_time = pl.at[i, 'StartTime']
-        scheduler.add_job(load_music, 'date', run_date=load_time, args=[path, pl_pos])
+        scheduler.add_job(load_music, 'date', run_date=load_time, args=[path])
         scheduler.add_job(play_music, 'date', run_date=start_time)
 
     try:
