@@ -2,10 +2,19 @@
 Project is in **very early developement!** :cowboy_hat_face:  
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.  
-Syncing NTP time over wireless network first and then scheduling pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.
+Syncing NTP time over wireless network first and then scheduling pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.  
+**Example music with different license is present at ./Music at the moment**  
+- See [./Music/music_license.md](./Music/music_license.md)  
 
-**Sadly it is too resource heavy to run on Raspberry Pi 3A+ 1G**
+### Use Cases
+[Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
+   - Multiple speakers distributed on Cargo Bikes and trailers
+   - Moving with changing conditions which make a network dependant solution hard or costly to implement (Mesh Wifi problems)
+   - [CM Duisburg](https://criticalmass.in/duisburg)
 
+### Similar Projects
+- [Claudiosync](https://claudiosync.de/)
+    - Announced plans to publish soon
 
 ### How to use  
 - `git clone https://github.com/beautiful-orca/JAudioSync.git`  
@@ -17,35 +26,28 @@ Syncing NTP time over wireless network first and then scheduling pygame.mixer.mu
     - `--t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
     - `--p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
 
-**Example music with different license is present at ./Music at the moment**  
-- See [./Music/music_license.md](./Music/music_license.md)  
-
 ### Dependencies needed to be installed  
-I am using Python 3.11.5 with JupyterLab in a Anaconda venv  
+I am using Python 3.11.5 with in a anaconda venv  
 ```
 pip install pygame
 pip install pydub
 pip install apscheduler
 ```
 
-
 ### ToDo, Future Ideas, Challenges and Notes  
-
+- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
+    - System clock drift needs testing (without network connection) 
+    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
 - GPS Time Sync
-    - https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network
-
+    - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
 - Reduce resource demand
-    - BlockingScheduler
-    - prepare playlist to dataframe
-    - pygame.mixer.init [samplerate/resample]
-    - pygame.mixer.music [streammusic from file] 
+    - pygame.mixer.init (samplerate/resampling necessary?)
+    - retest on Raspberry Pi 3B
 
-- Before playing (silent): "ALSA underrun occurred" on Raspberry Pi 3B
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
-   - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasmn
+   - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasm(n)
    - key auth from phone (Termux) to leader to control without need for password
-- Additional flags for Music path and Playlist path
 - Maybe rename project
 - Move git to privacy friendly hoster?
 
@@ -53,14 +55,11 @@ pip install apscheduler
     - What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
     - Tailscale VPN connection for network commands (script control)
 - Server and Client model  
-    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member[n]")  
+    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member(n)")  
     - NTP Server on leader
-        - might sync time from internet (mobile [phone] wifi hotspot with 4G internet), de.pool.ntp.org
+        - might sync time from internet (mobile (phone) wifi hotspot with 4G internet), de.pool.ntp.org
     - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
-- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
-    - System clock drift needs testing (without network connection) 
-    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
-    - Can a GPS clock be a viable option?
+
 
 
 ### Install and use on (multiple) Raspberry Pi 3 
@@ -151,13 +150,3 @@ ctl.mono {
     card Audio
 }
 ```
-
-### Use Cases
-[Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
-   - Multiple speakers distributed on Cargo Bikes and trailers
-   - Moving with changing conditions which make a network dependant solution hard or costly to implement (Mesh Wifi problems)
-   - [CM Duisburg](https://criticalmass.in/duisburg)
-
-### Similar Projects
-- [Claudiosync](https://claudiosync.de/)
-    - Announced plans to publish soon
