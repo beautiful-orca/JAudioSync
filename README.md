@@ -15,32 +15,12 @@ Using pygame.mixer.sound to load music files into Ram memory before playback to 
 - Place music fies in [./Music/](./Music/)  
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
-- Run: `python JAudioSync.py [-h] [--s_time 18:55:00] [--pl_pos 1|resume]`
-    - `--s_time`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: now + 10 seconds  
-    - `--pl_pos`, optional: Start track number in playlist, 1 - [number of tracks], or "resume" to resume from last played track, default: starting from 1  
-    - `--tz` , optional: Choose timezone, default: system timezone
+- Run: `python JAudioSync.py [-h] [--t 18:55:00] [--p 1| res]`
+    - `--t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
+    - `--p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
 
 **Example music with different license is present at ./Music at the moment**  
 - See [./Music/music_license.md](./Music/music_license.md)  
-
-#### Example output:
-```
-python JAudioSync.py --s_time 22:21:50 --pl_pos resume
-
-pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
-Hello from the pygame community. https://www.pygame.org/contribute.html
-Resuming with track 2.
-Start Playback at:  2024-01-01 22:21:50 , Playlist Posotion:  2
-./Music/102818__timbre__remix-of-41967__reverendblack__rev_loops_metal_guitar_12_brighter_buzzier-old1.mp3
-loaded:  22:21:49.012694
-length:  0:00:11
-playing:  22:21:50.000653
-./Music/485980__timbre__tweaked-version-of-fastdash99s-freesound-484749.mp3
-loaded:  22:22:01.027689
-length:  0:00:10
-playing:  22:22:02.000608
-Playlist finished playing
-```
 
 ### Dependencies needed to be installed  
 I am using Python 3.11.5 with JupyterLab in a Anaconda venv  
