@@ -26,6 +26,22 @@ Syncing NTP time over wireless network first and then scheduling pygame.mixer.mu
     - `--t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
     - `--p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
 
+### Example
+```
+python3 JAudioSync.py --p 2
+pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
+Hello from the pygame community. https://www.pygame.org/contribute.html
+Starting with Track: 2
+Playlist:                                                 Path            LoadTime           StartTime
+0  ./Music/85166__timbre__75315_oymaldonado_blues...                 NaT                 NaT
+1  ./Music/102818__timbre__remix-of-41967__revere...                 NaT                 NaT
+2  ./Music/485980__timbre__tweaked-version-of-fas... 2024-01-10 22:51:48 2024-01-10 22:51:49
+Playing: ./Music/485980__timbre__tweaked-version-of-fastdash99s-freesound-484749.mp3
+At: 2024-01-10 22:51:49.001153
+Playlist finished playing.
+```
+
+
 ### ToDo, Future Ideas, Challenges and Notes  
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 

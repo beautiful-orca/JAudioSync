@@ -93,24 +93,17 @@ def load_playlist(playlist_file):
 # Load a music file with pygame.mixer.music
 def load_music(path):
     global pl_pos
-    print(f"pl_pos: {pl_pos}")
     pl_pos += 1
-    print(f"pl_pos: {pl_pos}")
     mixer.music.load(path)
+    print(f"Playing: {path}")
     #mixer.music.set_volume(0.8)
 
 # Start playback of music from RAM memory
 def play_music():
     mixer.music.play()
+    print(f"At: {datetime.now()}")
     while mixer.get_busy() == True:
         continue
-
-def end(pl_pos):
-    with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
-        file.write(str(pl_pos))
-    scheduler.shutdown()
-    mixer.quit()
-    print("Playlist finished playing")
 
 def pl_fill_times(pl, start_time, pl_start, pl_len):
     for i in range(pl_start, pl_len):
@@ -121,15 +114,18 @@ def pl_fill_times(pl, start_time, pl_start, pl_len):
             pl.at[i, 'LoadTime'] = pl.at[i-1, 'StartTime'] + get_music_length(pl.at[i-1, 'Path'])
             pl.at[i, 'StartTime'] = pl.at[i, 'LoadTime'] + timedelta(seconds=1)
     return pl
-        
+
+def end():
+        print("Playlist finished playing.")
+        mixer.quit()
+        scheduler.shutdown(wait=False)
+    
 if __name__ == "__main__":
     playlist_file = "./Music/Playlist.m3u8" # Location of .m3u8 playlist file
     pl = load_playlist(playlist_file)
     pl_len = pl.shape[0]
-    print(f"pl_len: {pl_len}")
     timezone = time.tzname[time.localtime().tm_isdst]
     next_time = get_next_time()
-    print(f"next_time: {next_time}")
     
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
@@ -152,12 +148,12 @@ if __name__ == "__main__":
     global pl_pos
     pl_pos = args.p # Access parsed playlist position, starting with 0
     pl_start = int(pl_pos)
-    print(f"pl_start: {pl_start}")
+    print(f"Starting with Track: {pl_start}")
     
+    # fill playlist DataFrame with load_times and start_times
     pl = pl_fill_times(pl, start_time, pl_start, pl_len)
-    print(f"pl: {pl}")
+    print(f"Playlist: {pl}")
     
-
     mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
@@ -167,12 +163,16 @@ if __name__ == "__main__":
         start_time = pl.at[i, 'StartTime']
         scheduler.add_job(load_music, 'date', run_date=load_time, args=[path])
         scheduler.add_job(play_music, 'date', run_date=start_time)
-
+    
+    # Scheduling shutdown after last played track
+    end_time = pl.at[pl_len-1, 'StartTime'] + get_music_length(pl.at[pl_len-1, 'Path'])
+    scheduler.add_job(end, 'date', run_date=end_time)
+    
     try:
         scheduler.start()
-        if(pl_pos == pl.shape[0]):
-            end(pl_pos)
     except (KeyboardInterrupt, SystemExit):
-        end(pl_pos)
-        pass
-    # pretty printing
+        with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
+            file.write(str(pl_pos))
+        print("Script interrupted by user.")
+        mixer.quit()
+        scheduler.shutdown(wait=False)
