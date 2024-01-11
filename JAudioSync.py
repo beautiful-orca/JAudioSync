@@ -70,13 +70,16 @@ def validate_playlist_name(pl_str):
     playlist_name = os.path.join("./Music/", pl_str + ".m3u8")
     return playlist_name
 
+def is_mp3_file(file_path):
+    return file_path.lower().endswith(".mp3")
+
 # Read .m3u8 playlist file and extract music file paths to "playlist"
 def read_playlist(playlist_file):
     try:
         with open(playlist_file, mode='r') as file:
             lines = file.readlines()
             # Filter out comments and empty lines, clean, add ./Music
-        path = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
+        path = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#') and is_mp3_file(line.strip())]
         if path is None:
             raise ValueError(f"Playlist {playlist_file} is empty.")
         return path

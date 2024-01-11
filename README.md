@@ -21,7 +21,7 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
 - `git clone https://github.com/beautiful-orca/JAudioSync.git`  
 - `cd JAudioSync`  
 - Place mp3 fies in [./Music/](./Music/)  
-    - make sure they are mp3 and are properly tagged title, artist and have property length
+    - make sure they are mp3 and are properly tagged title, artist and have the property length
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
 - Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
@@ -44,7 +44,6 @@ Execution time: 0:00:00.002243
 
 
 ### ToDo, Future Ideas, Challenges and Notes
-- check if only mp3 files are in playlist
 - lists are generated beforehand, can be stored and read with pickle for fast start on less powerful devices
     - path, title, artist, length, resume_pos
     - 46 track playlist generated under 180ms on powerful laptop
