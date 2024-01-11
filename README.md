@@ -22,8 +22,7 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
 - `cd JAudioSync`  
 - Place mp3 fies in [./Music/](./Music/)  
     - make sure they are mp3 and are properly tagged title, artist and have the property length
-- Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
-    - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
+- Use VLC (or similar music player) to create a "m3u8" playlist, eg. party.m3u8, in [./Music/](./Music/)  
 - Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
     - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
     - `-p`, optional: Start track number in playlist, 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0  
