@@ -27,8 +27,7 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
     - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
     - `-p`, optional: Start track number in playlist, 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0  
     - `-l`, optional flag: Fast-loading last saved playlist (when present), default: reading new playlist from storage
-    - `-playlist_name`, optional: Load custom m3u8 playlist in ./Music (name), default: "Playlist"
- 
+    - `-playlist_name`, optional: Pick custom playlist name in ./Music, default: "Playlist"
 
 
 ### Example
