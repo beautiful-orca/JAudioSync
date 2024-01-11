@@ -44,7 +44,9 @@ Playlist finished playing.
 ### ToDo, Future Ideas, Challenges and Notes  
 - Reduce resource demand
     - pygame.mixer.init (samplerate/resampling necessary?)
-    - Raspberry Pi 3B+ 1GB cannot prepare playlist in 1.5 minutes
+    - Raspberry Pi 3B+ 1GB cannot prepare 45 tracks playlist in 1.5 minutes
+    - On Raspberry Pi 3A+ 512 MB script is killed before playlist is generated (memory limit?)
+    - not fast enough to use practically
  
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 
