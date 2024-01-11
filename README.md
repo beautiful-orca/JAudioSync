@@ -2,7 +2,8 @@
 Project is in **very early developement!** :cowboy_hat_face:  
 
 Play a (m3u8) playlist of music in perfect sync on multiple devices.  
-Syncing NTP time over wireless network first and then scheduling pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.  
+Syncing NTP time over wireless network first and then start pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.  
+
 **Example music with different license is present at ./Music at the moment**  
 - See [./Music/music_license.md](./Music/music_license.md)  
 
@@ -22,22 +23,22 @@ Syncing NTP time over wireless network first and then scheduling pygame.mixer.mu
 - Place music fies in [./Music/](./Music/)  
 - Using VLC (or similar music player) to create a playlist of songs in [./Music/](./Music/)  
     - Save Playlist as [./Music/Playlist.m3u8](./Music/Playlist.m3u8)  
-- Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 1 | res]`
+- Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
     - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
-    - `-p`, optional: Start track number in playlist, 0 - [number of tracks], or "res" to resume from last played track, default: starting from 0  
+    - `-p`, optional: Start track number in playlist, 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0  
+    - `-l`, optional flag: Fast-loading last saved playlist (when present), default: reading new playlist from storage
+    - `-playlist_name`, optional: Load custom m3u8 playlist in ./Music (name), default: "Playlist"
+ 
+
 
 ### Example
 ```
-python3 JAudioSync.py --p 2
+python3 JAudioSync.py -p 1
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
-Starting with Track: 2
-Playlist:
-                                                Path            LoadTime           StartTime
-2  ./Music/485980__timbre__tweaked-version-of-fas... 2024-01-10 22:51:48 2024-01-10 22:51:49
-Playing: ./Music/485980__timbre__tweaked-version-of-fastdash99s-freesound-484749.mp3
-At: 2024-01-10 22:51:49.001153
-Playlist finished playing.
+Playlist: ./Music/Playlist.m3u8 : 3 tracks
+Starting with Track: 1 at: 2024-01-11 23:26:30
+Execution time: 0:00:00.002243
 ```
 
 
