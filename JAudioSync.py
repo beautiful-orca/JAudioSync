@@ -152,7 +152,8 @@ if __name__ == "__main__":
     
     # fill playlist DataFrame with load_times and start_times
     pl = pl_fill_times(pl, start_time, pl_start, pl_len)
-    print(f"Playlist: {pl.iloc[pl_start:]}")
+    print(f"Playlist:")
+    print(pl.iloc[pl_start:])
     
     mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler

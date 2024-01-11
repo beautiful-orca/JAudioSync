@@ -32,7 +32,8 @@ python3 JAudioSync.py --p 2
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
 Starting with Track: 2
-Playlist:                                                 Path            LoadTime           StartTime
+Playlist:
+                                                Path            LoadTime           StartTime
 0  ./Music/85166__timbre__75315_oymaldonado_blues...                 NaT                 NaT
 1  ./Music/102818__timbre__remix-of-41967__revere...                 NaT                 NaT
 2  ./Music/485980__timbre__tweaked-version-of-fas... 2024-01-10 22:51:48 2024-01-10 22:51:49
