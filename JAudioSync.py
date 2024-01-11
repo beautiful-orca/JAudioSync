@@ -134,13 +134,13 @@ if __name__ == "__main__":
                                     which then doesn't need network anymore because it depends on system clock.  
                                     Using pygame.mixer.music to play.
                                     
-                                    usage: JAudioSync.py [-h] [--t 18:55:00] [--p 0 | res]
+                                    usage: JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res]
                                     """
                                     )
     
     # Add optional arguments
-    parser.add_argument('--t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', default=next_time)
-    parser.add_argument('--p', type=partial(validate_pl_pos, pl_len), help='Start track number in playlist [0 - number of tracks], or "resume" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
+    parser.add_argument('-t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', default=next_time)
+    parser.add_argument('-p', type=partial(validate_pl_pos, pl_len), help='Start track number in playlist [0 - number of tracks], or "resume" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
 
     args = parser.parse_args()  # Parse the command-line arguments
     start_time_str = args.t # Access parsed start time argument
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     
     # fill playlist DataFrame with load_times and start_times
     pl = pl_fill_times(pl, start_time, pl_start, pl_len)
-    print(f"Playlist: {pl}")
+    print(f"Playlist: {pl.iloc[pl_start:]}")
     
     mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
