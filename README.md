@@ -42,14 +42,15 @@ Playlist finished playing.
 
 
 ### ToDo, Future Ideas, Challenges and Notes  
+- Reduce resource demand
+    - pygame.mixer.init (samplerate/resampling necessary?)
+    - Raspberry Pi 3B+ 1GB cannot prepare playlist in 1.5 minutes
+ 
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 
     - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
 - GPS Time Sync
     - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
-- Reduce resource demand
-    - pygame.mixer.init (samplerate/resampling necessary?)
-    - retest on Raspberry Pi 3B
 
 - Stopping music playback on demand (local possible, remote needs to be implemented)
 - Common interface: distribute commands to all clients at the same time
