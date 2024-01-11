@@ -34,8 +34,6 @@ Hello from the pygame community. https://www.pygame.org/contribute.html
 Starting with Track: 2
 Playlist:
                                                 Path            LoadTime           StartTime
-0  ./Music/85166__timbre__75315_oymaldonado_blues...                 NaT                 NaT
-1  ./Music/102818__timbre__remix-of-41967__revere...                 NaT                 NaT
 2  ./Music/485980__timbre__tweaked-version-of-fas... 2024-01-10 22:51:48 2024-01-10 22:51:49
 Playing: ./Music/485980__timbre__tweaked-version-of-fastdash99s-freesound-484749.mp3
 At: 2024-01-10 22:51:49.001153
@@ -75,6 +73,7 @@ I am using Python 3.11.5 in a anaconda venv
 - [pydub](https://github.com/jiaaro/pydub)
    - [needs ffmpeg](http://www.ffmpeg.org/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
+- [pandas](https://pandas.pydata.org/)
 
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
@@ -87,7 +86,7 @@ I am using Python 3.11.5 in a anaconda venv
     - Enable ssh password authentication  
     - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git ffmpeg python3-pygame python3-pydub python3-apscheduler`
+    - `sudo apt install git ffmpeg python3-pygame python3-pydub python3-apscheduler python3-pandas`
     - `python --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
