@@ -42,6 +42,11 @@ Playlist finished playing.
 
 
 ### ToDo, Future Ideas, Challenges and Notes  
+- lists are generated beforehand, can be stored and read with pickle for fast start on less powerful devices
+    - path, title, artist, length, resume_pos
+    - 46 track playlist generated under 180ms on powerful laptop
+- make timing table with timedeltas representing playback length
+    
 - Reduce resource demand
     - pygame.mixer.init (samplerate/resampling necessary?)
     - Raspberry Pi 3B+ 1GB cannot prepare 45 tracks playlist in 1.5 minutes
@@ -73,8 +78,7 @@ Playlist finished playing.
 ### Dependencies needed to be installed  
 I am using Python 3.11.5 in a anaconda venv  
 - [pygame](https://www.pygame.org/docs/ref/mixer.html)
-- [pydub](https://github.com/jiaaro/pydub)
-   - [needs ffmpeg](http://www.ffmpeg.org/)
+- [mutagen](https://mutagen.readthedocs.io/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
 - [pandas](https://pandas.pydata.org/)
 
@@ -89,7 +93,7 @@ I am using Python 3.11.5 in a anaconda venv
     - Enable ssh password authentication  
     - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git ffmpeg python3-pygame python3-pydub python3-apscheduler python3-pandas`
+    - `sudo apt install git python3-pygame python3-mutagen python3-apscheduler python3-pandas`
     - `python --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
