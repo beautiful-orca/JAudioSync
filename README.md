@@ -36,7 +36,7 @@ python3 JAudioSync.py -p 1
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
 Playlist: ./Music/Playlist.m3u8 : 3 tracks
-Starting with Track: 1 at: 2024-01-11 23:26:30
+Starting with track: 1 , at: 2024-01-11 23:26:30
 Execution time: 0:00:00.002243
 ```
 

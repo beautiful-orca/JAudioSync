@@ -239,7 +239,7 @@ if __name__ == "__main__":
     if 0 <= pl_pos < pl_len:
         pl_start = int(pl_pos)
         print(f"Playlist: {playlist_name} : {pl_len} tracks")
-        print(f"Starting with Track: {pl_start} at: {start_time}")
+        print(f"Starting with track: {pl_start} , at: {start_time}")
     else:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pl_pos}.")
 
