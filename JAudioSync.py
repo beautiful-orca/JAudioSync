@@ -36,13 +36,6 @@ def validate_time_string(time_str):
         raise argparse.ArgumentTypeError(f"Invalid time format: {time_str} , use valid hh:mm:ss")
     return time_str
 
-# Convert time string to a datetime object with date of today
-def string_to_datetime(time_string):
-    format_str = "%H:%M:%S"
-    today_date = datetime.now().date()
-    datetime_str = f"{today_date} {time_string}"
-    return datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
-
 def read_resume_position(pl_len):
     try:
         with open("./.resume", "r") as file:
@@ -68,6 +61,13 @@ def validate_pl_pos(pl_len, pos):
     except ValueError:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pos}.")
 
+# Convert time string to a datetime object with date of today
+def string_to_datetime(time_string):
+    format_str = "%H:%M:%S"
+    today_date = datetime.now().date()
+    datetime_str = f"{today_date} {time_string}"
+    return datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
+
 # Get the rounded up playback length of a music file as timedelta (seconds)
 def get_music_length(file_path):
     audio = AudioSegment.from_mp3(file_path)
@@ -84,21 +84,11 @@ def load_playlist(playlist_file):
         path = [os.path.join("./Music", unquote(line.strip())) for line in lines if line.strip() and not line.startswith('#')]
         if path is None:
             raise ValueError(f"Playlist {playlist_file} is empty.")
-        return path
+        return pd.DataFrame({'Path': path})
     except FileNotFoundError:
-        print(f'The playlist file {playlist_file} is not present.')
+        print(f'The playlist file {file_path} is not present.')
     except Exception as e:
         print(f'An error occurred: {e}')
-
-def pl_fill_times(pl, start_time, pl_start, pl_len):
-    for i in range(pl_start, pl_len):
-        if i == pl_start:
-            pl.at[i, 'LoadTime'] = start_time - timedelta(seconds=1)
-            pl.at[i, 'StartTime'] = start_time
-        elif pl_start < i:
-            pl.at[i, 'LoadTime'] = pl.at[i-1, 'StartTime'] + get_music_length(pl.at[i-1, 'Path'])
-            pl.at[i, 'StartTime'] = pl.at[i, 'LoadTime'] + timedelta(seconds=1)
-    return pl
 
 # Load a music file with pygame.mixer.music
 def load_music(path):
@@ -115,6 +105,16 @@ def play_music():
     while mixer.get_busy() == True:
         continue
 
+def pl_fill_times(pl, start_time, pl_start, pl_len):
+    for i in range(pl_start, pl_len):
+        if i == pl_start:
+            pl.at[i, 'LoadTime'] = start_time - timedelta(seconds=1)
+            pl.at[i, 'StartTime'] = start_time
+        elif pl_start < i:
+            pl.at[i, 'LoadTime'] = pl.at[i-1, 'StartTime'] + get_music_length(pl.at[i-1, 'Path'])
+            pl.at[i, 'StartTime'] = pl.at[i, 'LoadTime'] + timedelta(seconds=1)
+    return pl
+
 def end():
         print("Playlist finished playing.")
         mixer.quit()
@@ -123,13 +123,9 @@ def end():
 if __name__ == "__main__":
     playlist_file = "./Music/Playlist.m3u8" # Location of .m3u8 playlist file
     pl = load_playlist(playlist_file)
-    print("pl: ")
-    print(pl)
-    pl_len = pl.len()
-    print(f"pl_len: {pl_len}")
+    pl_len = pl.shape[0]
     timezone = time.tzname[time.localtime().tm_isdst]
     next_time = get_next_time()
-    print(f"next_time: {next_time}")
     
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
