@@ -155,6 +155,7 @@ if __name__ == "__main__":
     print(f"Playlist:")
     print(pl.iloc[pl_start:])
     
+    mixer.init()
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
     for i in range(pl_start, pl_len):
@@ -169,7 +170,6 @@ if __name__ == "__main__":
     scheduler.add_job(end, 'date', run_date=end_time)
     
     try:
-        mixer.init()
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         with open("./.resume", 'w') as file: # Write current pl_pos to .resume file
@@ -177,9 +177,3 @@ if __name__ == "__main__":
         print("Script interrupted by user.")
         mixer.quit()
         scheduler.shutdown(wait=False)
-
-
-'''
-make timing table with timedeltas representing playback length
-can be generated beforehand, stored and read for fast start on less powerful devices
-'''
