@@ -205,19 +205,20 @@ if __name__ == "__main__":
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
                                     Play a (m3u8) playlist of music in perfect sync on multiple devices.  
-                                    Syncing NTP time over wireless network first and then start pygame.mixer.music playback at exact choosen time 
-                                    (using apscheduler), which then doesn't need network anymore because it depends on system clock.
-                                    Add RTC for more accuracy.
+                                    Syncing NTP time over wireless network first and then start pygame.mixer.music
+                                    playback at exact choosen time (using apscheduler),which then doesn't need network
+                                    anymore because it depends on system clock.
+                                    RTC (RealTimeClock) helps keeping correct time. 
                                     
                                     usage: JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]
                                     """
                                     )
     
     # Add optional arguments
-    parser.add_argument('-t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: next full minute', nargs='?', const=next_time, default=next_time)
-    parser.add_argument('-p', type=validate_pl_pos, help='Start track number in playlist [0 - number of tracks], or "resume" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
-    parser.add_argument('-l', action='store_true', help='Fast-loading last saved playlist')
-    parser.add_argument('--playlist_name', type=validate_playlist_name, help='Name of m3u8 playlist in ./Music', nargs='?', const='Playlist', default='Playlist')
+    parser.add_argument('-t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute', nargs='?', const=next_time, default=next_time)
+    parser.add_argument('-p', type=validate_pl_pos, help='Start track number in playlist 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
+    parser.add_argument('-l', action='store_true', help='Fast-loading last saved playlist (when present), default: reading new playlist from storage')
+    parser.add_argument('-playlist_name', type=validate_playlist_name, help='Load custom m3u8 playlist in ./Music (name)', nargs='?', const='Playlist', default='Playlist')
  
     args = parser.parse_args()  # Parse the command-line arguments
     
@@ -235,7 +236,7 @@ if __name__ == "__main__":
     if 0 <= pl_pos < pl_len:
         pl_start = int(pl_pos)
         print(f"Playlist: {playlist_name} : {pl_len} tracks")
-        print(f"Starting with Track: {pl_start}")
+        print(f"Starting with Track: {pl_start} at: {start_time}")
     else:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pl_pos}.")
 
