@@ -35,14 +35,14 @@ python3 JAudioSync.py
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
 Playlist: ./Music/Playlist.m3u8 | Tracks: 3 | Runtime: 0:00:34
-Starting with track: 0 , at: 2024-01-12 06:40:20
+Starting with track: 0 , at: 2024-01-13 00:02:05
 Playing: Oymaldonado Bluesy Rock Guitar 3 Enveloped Reverbed - Timbre
-At: 2024-01-12 06:40:20.000869
+At: 2024-01-13 00:02:05.000790
 Playing: Remix of Reverendblack Rev Loops Metal Guitar 12 Brighter Buzzier Old 1 - Timbre
-At: 2024-01-12 06:40:31.000801
+At: 2024-01-13 00:02:16.000901
 [src/libmpg123/id3.c:process_extra():681] error: No extra frame text / valid description?
 Playing: Tweaked Version of Fastdash99s freesound 484749 - Timbre
-At: 2024-01-12 06:40:43.000782
+At: 2024-01-13 00:02:28.000729
 Playlist finished playing.
 ```
 
