@@ -234,7 +234,7 @@ if __name__ == "__main__":
                                     )
     
     # Add optional arguments
-    parser.add_argument('-t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute', nargs='?', const=next_time, default=next_time)
+    parser.add_argument('-t', type=validate_time_string, help='Time the playback should be scheduled today in the format hh:mm:ss, default: in 5-20 seconds (at 5,20,35,50)', nargs='?', const=next_time, default=next_time)
     parser.add_argument('-p', type=validate_pl_pos, help='Start track number in playlist 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0', nargs='?', const=0, default=0)
     parser.add_argument('-l', action='store_true', help='Fast-loading last saved playlist (when present), default: reading new playlist from storage')
     parser.add_argument('-playlist_name', type=validate_playlist_name, help='Pick custom playlist name in ./Music', nargs='?', const='Playlist', default='Playlist')

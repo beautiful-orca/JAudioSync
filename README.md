@@ -24,24 +24,32 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
     - make sure they are mp3 and are properly tagged title, artist and have the property length
 - Use VLC (or similar music player) to create a "m3u8" playlist, eg. party.m3u8, in [./Music/](./Music/)  
 - Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
-    - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: at half or full minute  
+    - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: in 5-20 seconds (at 5,20,35,50)  
     - `-p`, optional: Start track number in playlist, 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0  
     - `-l`, optional flag: Fast-loading last saved playlist (when present), default: reading new playlist from storage
     - `-playlist_name`, optional: Pick custom playlist name in ./Music, default: "Playlist"
 
 ### Example
 ```
-python3 JAudioSync.py -p 1
+python3 JAudioSync.py
 pygame 2.5.2 (SDL 2.28.2, Python 3.11.5)
 Hello from the pygame community. https://www.pygame.org/contribute.html
-Playlist: ./Music/Playlist.m3u8 : 3 tracks
-Starting with track: 1 , at: 2024-01-11 23:26:30
-Execution time: 0:00:00.002243
+Playlist: ./Music/Playlist.m3u8 | Tracks: 3 | Runtime: 0:00:34
+Starting with track: 0 , at: 2024-01-12 06:40:20
+Playing: Oymaldonado Bluesy Rock Guitar 3 Enveloped Reverbed - Timbre
+At: 2024-01-12 06:40:20.000869
+Playing: Remix of Reverendblack Rev Loops Metal Guitar 12 Brighter Buzzier Old 1 - Timbre
+At: 2024-01-12 06:40:31.000801
+[src/libmpg123/id3.c:process_extra():681] error: No extra frame text / valid description?
+Playing: Tweaked Version of Fastdash99s freesound 484749 - Timbre
+At: 2024-01-12 06:40:43.000782
+Playlist finished playing.
 ```
 
 ### ToDo, Future Ideas, Challenges and Notes
 - 46 track playlist generated under 180ms on powerful laptop
 - Need test on Raspi
+    - music playback drifts between Pi 3A+ and Pi 3B+
     
 - Reduce resource demand
     - pygame.mixer.init (samplerate/resampling necessary?)
