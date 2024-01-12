@@ -176,7 +176,7 @@ def fill_runtime_matrix(length, pl_start, pl_len):
 def load_music(path, title, artist):
     mixer.music.load(path)
     print(f"Playing: {title} - {artist}")
-    #mixer.music.set_volume(0.8)
+    mixer.music.set_volume(0.9)
 
 # Start playback of music from RAM memory
 def play_music():

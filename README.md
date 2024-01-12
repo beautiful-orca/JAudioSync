@@ -73,7 +73,6 @@ I am using Python 3.11.5 in a anaconda venv
 - [pygame](https://www.pygame.org/docs/ref/mixer.html)
 - [mutagen](https://mutagen.readthedocs.io/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
-- [pandas](https://pandas.pydata.org/)
 
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
@@ -86,7 +85,7 @@ I am using Python 3.11.5 in a anaconda venv
     - Enable ssh password authentication  
     - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git python3-pygame python3-mutagen python3-apscheduler python3-pandas`
+    - `sudo apt install git python3-pygame python3-mutagen python3-apscheduler`
     - `python --version`
     - `cd ~/`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
