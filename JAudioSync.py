@@ -15,18 +15,23 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 def get_next_time():    
     second = datetime.now().second
     minute = datetime.now().minute
-
-    if second < 30:
+    
+    if 0 <= second <= 15:
+        next_time = datetime.now()
+        next_time = next_time.replace(second=20,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
+    if 16 <= second <= 30:
+        next_time = datetime.now()
+        next_time = next_time.replace(second=35,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
+    if 30 < second <= 45:
+        next_time = datetime.now()
+        next_time = next_time.replace(second=50,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
+    if 45 < second <= 59:
         next_time = datetime.now() + timedelta(minutes=1)
-        next_time = next_time.replace(second=0,  microsecond=0).strftime('%H:%M:%S')
-
-    if second > 30:
-        next_time = datetime.now() + timedelta(minutes=1)
-        next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
-    # debug
-    #next_time = datetime.now() + timedelta(seconds=5)
-    #next_time = next_time.replace(microsecond=0).strftime('%H:%M:%S')
-    return next_time
+        next_time = next_time.replace(second=5,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
 
 # Validate hh:mm:ss time format for t input
 def validate_time_string(time_str):
@@ -174,13 +179,16 @@ def fill_runtime_matrix(length, pl_start, pl_len):
 
 # Load a music file with pygame.mixer.music
 def load_music(path, title, artist):
-    mixer.music.load(path)
+    global sound
+    sound = mixer.Sound(path)
+    # mixer.music.load(path)
     print(f"Playing: {title} - {artist}")
-    mixer.music.set_volume(0.9)
+    #mixer.music.set_volume(0.9)
 
 # Start playback of music from RAM memory
 def play_music():
-    mixer.music.play()
+    sound.play()
+    #mixer.music.play()
     print(f"At: {datetime.now()}")
     while mixer.get_busy() == True:
         continue
