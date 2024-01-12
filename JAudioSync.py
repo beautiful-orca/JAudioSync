@@ -95,7 +95,7 @@ def read_playlist(playlist_file):
     except Exception as e:
         print(f'An error occurred: {e}')
 
-def pickle_load_p_t_a_l():
+def load_p_t_a_l():
     try:
         with open('path.pkl', 'rb') as file:
             path = pickle.load(file)
@@ -116,7 +116,6 @@ def pickle_load_p_t_a_l():
             length = pickle.load(file)
     except FileNotFoundError:
         raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
-    
     return path, title, artist, length
 
 def create_t_a_l(path):
@@ -146,7 +145,7 @@ def load_playlist(l, playlist_name):
     if l:
         try:
             # pickle load path, title, artist, length
-            path, title, artist, length = pickle_load_p_t_a_l()
+            path, title, artist, length = load_p_t_a_l()
             return path, title, artist, length
         
         except:
@@ -160,7 +159,25 @@ def load_playlist(l, playlist_name):
         title, artist, length = create_t_a_l(path)
         return path, title, artist, length
 
-def fill_runtime_matrix(length, pl_start, pl_len):
+def load_lts_sts_et():
+    try:
+        with open('lts.pkl', 'rb') as file:
+            lts = pickle.load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
+    try:
+        with open('sts.pkl', 'rb') as file:
+            sts = pickle.load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
+    try:
+        with open('et.pkl', 'rb') as file:
+            et = pickle.load(file)
+    except FileNotFoundError:
+        raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
+    return lts, sts, et
+
+def create_lts_sts_et(length, pl_start, pl_len):
     lts = []
     sts = []
     for j in range(0,pl_start-1):
@@ -176,6 +193,19 @@ def fill_runtime_matrix(length, pl_start, pl_len):
             sts.append(t + timedelta(seconds=1))
     et = sts[-1] + length[-1]
     return lts, sts, et
+
+def load_runtime_matrix(l, length, pl_start, pl_len):
+    if l:
+        try:
+            lts, sts, et = load_lts_sts_et()
+            return lts, sts, et
+        
+        except:
+            lts, sts, et = create_lts_sts_et(length, pl_start, pl_len)
+            return lts, sts, et
+    else:
+        lts, sts, et =  create_lts_sts_et(length, pl_start, pl_len)
+        return lts, sts, et
 
 # Load a music file with pygame.mixer.music
 def load_music(path, title, artist):
@@ -209,10 +239,19 @@ def save_resume_pos(resume_pos):
     with open('resume_pos.pkl', 'wb') as file:
         pickle.dump(resume_pos, file)
 
-def end(path, title, artist, length):
+def save_lts_sts_et(lts, sts, et):
+    with open('lts.pkl', 'wb') as file:
+        pickle.dump(lts, file)
+    with open('sts.pkl', 'wb') as file:
+        pickle.dump(sts, file)
+    with open('et.pkl', 'wb') as file:
+        pickle.dump(et, file)
+
+def end(path, title, artist, length, lts, sts, et):
         print("Playlist finished playing.")
         # pickle save path, title, artist, length
-        save_p_t_a_l(path, title, artist, length )
+        save_p_t_a_l(path, title, artist, length)
+        save_lts_sts_et(lts, sts, et)
         scheduler.shutdown(wait=False)
         mixer.quit()
     
@@ -256,7 +295,8 @@ if __name__ == "__main__":
     else:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pl_pos}.")
 
-    lts, sts, et = fill_runtime_matrix(length, pl_start, pl_len)
+    lts, sts, et = load_runtime_matrix(l, length, pl_start, pl_len)
+    
     print(f"Playlist: {playlist_name} | Tracks: {pl_len} | Runtime: {et}")
     print(f"Starting with track: {pl_start} , at: {sched_time}")
     
@@ -284,7 +324,7 @@ if __name__ == "__main__":
     
     # Scheduling shutdown after last played track
     end_time = sched_time + et
-    scheduler.add_job(end, 'date', run_date=end_time, args=[path, title, artist, length])
+    scheduler.add_job(end, 'date', run_date=end_time, args=[path, title, artist, length, lts, sts, et])
     
     try:
         mixer.init()
@@ -294,6 +334,7 @@ if __name__ == "__main__":
         save_p_t_a_l(path, title, artist, length)
         # pickle save pl_pos
         save_resume_pos(resume_pos)
+        save_lts_sts_et(lts, sts, et)
         print("Script interrupted by user.")
         scheduler.shutdown(wait=False)
         mixer.quit()
