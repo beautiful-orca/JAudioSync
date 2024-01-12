@@ -177,10 +177,11 @@ def load_lts_sts_et():
         raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
     return lts, sts, et
 
-def create_lts_sts_et(length, pl_start, pl_len):
+def create_lts_sts_et(length, pl_start, pl_len): #pl_start 1 pl_len 3
+    print(f"pl_len: {pl_len}")
     lts = []
     sts = []
-    for j in range(0,pl_start-1):
+    for _ in range(0,pl_start):
         lts.append(timedelta(seconds=0))
         sts.append(timedelta(seconds=0))
     for i in range(pl_start, pl_len):
@@ -188,7 +189,7 @@ def create_lts_sts_et(length, pl_start, pl_len):
             lts.append(timedelta(seconds=0))
             sts.append(timedelta(seconds=1))
         elif i > pl_start:
-            t = length[i-1] + sts[i-1]
+            t = sts[i-1] + length[i-1]  # JAudioSync.py -p 1 sts[i-1] list index out of range
             lts.append(t)
             sts.append(t + timedelta(seconds=1))
     et = sts[-1] + length[-1]
@@ -301,24 +302,16 @@ if __name__ == "__main__":
     print(f"Starting with track: {pl_start} , at: {sched_time}")
     
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
-    
     sched_time = sched_time - timedelta(seconds=1)
  
-    for pl_pos in range(pl_start, pl_len):
-        p = path[pl_pos]
-        t = title [pl_pos]
-        a = artist [pl_pos]
+    for pos in range(pl_start, pl_len):
+        p = path[pos]
+        t = title [pos]
+        a = artist [pos]
         
-        load_time = sched_time + lts[pl_pos]
-        start_time = sched_time + sts[pl_pos]
-        '''
-        # times debugging
-        print(f"lts: {lts[pl_pos]}")
-        print(f"load_time: {load_time}")
-        print(f"sts: {sts[pl_pos]}")
-        print(f"start_time: {start_time}")
-        print(f"length: {length[pl_pos]}")
-        '''
+        load_time = sched_time + lts[pos] # lts pl_pos list index out of range JAudioSync.py -p 1
+        start_time = sched_time + sts[pos]
+
         scheduler.add_job(load_music, 'date', run_date=load_time, args=[p,t,a])
         scheduler.add_job(play_music, 'date', run_date=start_time)
     
