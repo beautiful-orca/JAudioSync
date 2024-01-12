@@ -24,11 +24,11 @@ def get_next_time():
         next_time = datetime.now() + timedelta(minutes=1)
         next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
     # debug
-    #next_time = datetime.now() + timedelta(seconds=10)
+    #next_time = datetime.now() + timedelta(seconds=5)
     #next_time = next_time.replace(microsecond=0).strftime('%H:%M:%S')
     return next_time
 
-# Validate hh:mm:ss time format for start_time input
+# Validate hh:mm:ss time format for t input
 def validate_time_string(time_str):
     # Regular expression to validate the format hh:mm:ss
     pattern = re.compile(r'^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$')
@@ -41,11 +41,13 @@ def string_to_datetime(time_string):
     format_str = "%H:%M:%S"
     today_date = datetime.now().date()
     datetime_str = f"{today_date} {time_string}"
-    return datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
+    dt = datetime.strptime(datetime_str, f"%Y-%m-%d {format_str}")
+    return dt
 
 def read_resume_position():
     try:
         with open('resume_pos.pkl', 'rb') as file:
+            global resume_pos
             resume_pos = pickle.load(file)
         return resume_pos
     except FileNotFoundError:
@@ -152,14 +154,28 @@ def load_playlist(l, playlist_name):
         #create variables title, artist, length
         title, artist, length = create_t_a_l(path)
         return path, title, artist, length
-    
+
+def fill_runtime_matrix(length, pl_start, pl_len):
+    lts = []
+    sts = []
+    for j in range(0,pl_start-1):
+        lts.append(timedelta(seconds=0))
+        sts.append(timedelta(seconds=0))
+    for i in range(pl_start, pl_len):
+        if i == pl_start:
+            lts.append(timedelta(seconds=0))
+            sts.append(timedelta(seconds=1))
+        elif i > pl_start:
+            t = length[i-1] + sts[i-1]
+            lts.append(t)
+            sts.append(t + timedelta(seconds=1))
+    et = sts[-1] + length[-1]
+    return lts, sts, et
+
 # Load a music file with pygame.mixer.music
-def load_music(path):
-    global pl_pos
-    pl_pos += 1
+def load_music(path, title, artist):
     mixer.music.load(path)
-    # Title- Artist:
-    print(f"Playing: {path}")
+    print(f"Playing: {title} - {artist}")
     #mixer.music.set_volume(0.8)
 
 # Start playback of music from RAM memory
@@ -168,16 +184,8 @@ def play_music():
     print(f"At: {datetime.now()}")
     while mixer.get_busy() == True:
         continue
-
-def pl_fill_times(pl, start_time, pl_start, pl_len):
-    for i in range(pl_start, pl_len):
-        if i == pl_start:
-            pl.at[i, 'LoadTime'] = start_time - timedelta(seconds=1)
-            pl.at[i, 'StartTime'] = start_time
-        elif pl_start < i:
-            pl.at[i, 'LoadTime'] = pl.at[i-1, 'StartTime'] + get_music_length(pl.at[i-1, 'Path'])
-            pl.at[i, 'StartTime'] = pl.at[i, 'LoadTime'] + timedelta(seconds=1)
-    return pl
+    global pl_pos
+    pl_pos += 1
 
 def save_p_t_a_l(path, title, artist, length ):
     with open('path.pkl', 'wb') as file:
@@ -189,21 +197,21 @@ def save_p_t_a_l(path, title, artist, length ):
     with open('length.pkl', 'wb') as file:
         pickle.dump(length, file)
 
-def save_resume_pos(pl_pos):
+def save_resume_pos(resume_pos):
     with open('resume_pos.pkl', 'wb') as file:
         pickle.dump(resume_pos, file)
 
-def end():
+def end(path, title, artist, length):
         print("Playlist finished playing.")
         # pickle save path, title, artist, length
         save_p_t_a_l(path, title, artist, length )
-        mixer.quit()
         scheduler.shutdown(wait=False)
+        mixer.quit()
     
 if __name__ == "__main__":
-    st = datetime.now()
     next_time = get_next_time()
     timezone = time.tzname[time.localtime().tm_isdst]
+    resume_pos = 0
     
     # Create ArgumentParser object
     parser = argparse.ArgumentParser(description="""
@@ -225,10 +233,9 @@ if __name__ == "__main__":
  
     args = parser.parse_args()  # Parse the command-line arguments
     
-    start_time_str = args.t # Access parsed start time argument
-    start_time = string_to_datetime(start_time_str) # Convert time string to a datetime object
+    sched_time_str = args.t # Access parsed start time argument
+    sched_time = string_to_datetime(sched_time_str) # Convert time string to a datetime object
     
-    global pl_pos
     pl_pos = args.p # Access parsed playlist position, starting with 0
     l = args.l
     playlist_name = args.playlist_name
@@ -238,37 +245,47 @@ if __name__ == "__main__":
     
     if 0 <= pl_pos < pl_len:
         pl_start = int(pl_pos)
-        print(f"Playlist: {playlist_name} : {pl_len} tracks")
-        print(f"Starting with track: {pl_start} , at: {start_time}")
     else:
         raise argparse.ArgumentTypeError(f"Invalid playlist position: {pl_pos}.")
 
-    et = datetime.now()
-    execution_time = et -st
-    print(f"Execution time: {execution_time}")
-'''
+    lts, sts, et = fill_runtime_matrix(length, pl_start, pl_len)
+    print(f"Playlist: {playlist_name} | Tracks: {pl_len} | Runtime: {et}")
+    print(f"Starting with track: {pl_start} , at: {sched_time}")
+    
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
     
+    sched_time = sched_time - timedelta(seconds=1)
+ 
     for pl_pos in range(pl_start, pl_len):
-        path = pl.at[i, "Path"]
-        load_time = pl.at[i, 'LoadTime']
-        start_time = pl.at[i, 'StartTime']
-        scheduler.add_job(load_music, 'date', run_date=load_time, args=[path])
+        p = path[pl_pos]
+        t = title [pl_pos]
+        a = artist [pl_pos]
+        
+        load_time = sched_time + lts[pl_pos]
+        start_time = sched_time + sts[pl_pos]
+        '''
+        # times debugging
+        print(f"lts: {lts[pl_pos]}")
+        print(f"load_time: {load_time}")
+        print(f"sts: {sts[pl_pos]}")
+        print(f"start_time: {start_time}")
+        print(f"length: {length[pl_pos]}")
+        '''
+        scheduler.add_job(load_music, 'date', run_date=load_time, args=[p,t,a])
         scheduler.add_job(play_music, 'date', run_date=start_time)
     
     # Scheduling shutdown after last played track
-    end_time = pl.at[pl_len-1, 'StartTime'] + get_music_length(pl.at[pl_len-1, 'Path'])
-    scheduler.add_job(end, 'date', run_date=end_time, args=[path])
+    end_time = sched_time + et
+    scheduler.add_job(end, 'date', run_date=end_time, args=[path, title, artist, length])
     
     try:
         mixer.init()
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         # pickle save path, title, artist, length
-        save_p_t_a_l(path, title, artist, length )
+        save_p_t_a_l(path, title, artist, length)
         # pickle save pl_pos
-        save_resume_pos(pl_pos)
+        save_resume_pos(resume_pos)
         print("Script interrupted by user.")
-        mixer.quit()
         scheduler.shutdown(wait=False)
-'''
+        mixer.quit()

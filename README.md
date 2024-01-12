@@ -29,7 +29,6 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
     - `-l`, optional flag: Fast-loading last saved playlist (when present), default: reading new playlist from storage
     - `-playlist_name`, optional: Pick custom playlist name in ./Music, default: "Playlist"
 
-
 ### Example
 ```
 python3 JAudioSync.py -p 1
@@ -40,18 +39,12 @@ Starting with track: 1 , at: 2024-01-11 23:26:30
 Execution time: 0:00:00.002243
 ```
 
-
 ### ToDo, Future Ideas, Challenges and Notes
-- lists are generated beforehand, can be stored and read with pickle for fast start on less powerful devices
-    - path, title, artist, length, resume_pos
-    - 46 track playlist generated under 180ms on powerful laptop
-- make timing table with timedeltas representing playback length
+- 46 track playlist generated under 180ms on powerful laptop
+- Need test on Raspi
     
 - Reduce resource demand
     - pygame.mixer.init (samplerate/resampling necessary?)
-    - Raspberry Pi 3B+ 1GB cannot prepare 45 tracks playlist in 1.5 minutes
-    - On Raspberry Pi 3A+ 512 MB script is killed before playlist is generated (memory limit?)
-    - not fast enough to use practically
  
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
     - System clock drift needs testing (without network connection) 
@@ -149,7 +142,6 @@ ctl.!default {
    card Audio
 }
 ```
-
 
 #### Mono Channel (optional)
 ```
