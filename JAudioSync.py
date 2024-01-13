@@ -177,8 +177,7 @@ def load_lts_sts_et():
         raise FileNotFoundError("Playlist cannot be loaded, run without '-l'")
     return lts, sts, et
 
-def create_lts_sts_et(length, pl_start, pl_len): #pl_start 1 pl_len 3
-    print(f"pl_len: {pl_len}")
+def create_lts_sts_et(length, pl_start, pl_len):
     lts = []
     sts = []
     for _ in range(0,pl_start):
@@ -187,11 +186,11 @@ def create_lts_sts_et(length, pl_start, pl_len): #pl_start 1 pl_len 3
     for i in range(pl_start, pl_len):
         if i == pl_start:
             lts.append(timedelta(seconds=0))
-            sts.append(timedelta(seconds=1))
+            sts.append(timedelta(seconds=2))
         elif i > pl_start:
-            t = sts[i-1] + length[i-1]  # JAudioSync.py -p 1 sts[i-1] list index out of range
+            t = sts[-1] + length[-1]
             lts.append(t)
-            sts.append(t + timedelta(seconds=1))
+            sts.append(t + timedelta(seconds=2))
     et = sts[-1] + length[-1]
     return lts, sts, et
 
@@ -302,7 +301,7 @@ if __name__ == "__main__":
     print(f"Starting with track: {pl_start} , at: {sched_time}")
     
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
-    sched_time = sched_time - timedelta(seconds=1)
+    sched_time = sched_time - timedelta(seconds=2)
  
     for pos in range(pl_start, pl_len):
         p = path[pos]
@@ -320,7 +319,7 @@ if __name__ == "__main__":
     scheduler.add_job(end, 'date', run_date=end_time, args=[path, title, artist, length, lts, sts, et])
     
     try:
-        mixer.init()
+        mixer.init(48000, -16, 1, 1024)
         scheduler.start()
     except (KeyboardInterrupt, SystemExit):
         # pickle save path, title, artist, length
