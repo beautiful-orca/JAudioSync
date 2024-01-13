@@ -208,11 +208,11 @@ def load_runtime_matrix(l, length, pl_start, pl_len):
         return lts, sts, et
 
 # Load a music file with pygame.mixer.music
-def load_music(path, title, artist):
+def load_music(path, title, artist, pos):
     global sound
     sound = mixer.Sound(path)
     # mixer.music.load(path)
-    print(f"Playing: {title} - {artist}")
+    print(f"Playing {pos}: {title} - {artist}")
     #mixer.music.set_volume(0.9)
 
 # Start playback of music from RAM memory
@@ -311,7 +311,7 @@ if __name__ == "__main__":
         load_time = sched_time + lts[pos] # lts pl_pos list index out of range JAudioSync.py -p 1
         start_time = sched_time + sts[pos]
 
-        scheduler.add_job(load_music, 'date', run_date=load_time, args=[p,t,a])
+        scheduler.add_job(load_music, 'date', run_date=load_time, args=[p,t,a,pos])
         scheduler.add_job(play_music, 'date', run_date=start_time)
     
     # Scheduling shutdown after last played track
