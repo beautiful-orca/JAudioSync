@@ -16,21 +16,29 @@ def get_next_time():
     second = datetime.now().second
     minute = datetime.now().minute
     
-    if 0 <= second <= 15:
+    if 0 <= second <= 10:
         next_time = datetime.now()
         next_time = next_time.replace(second=20,  microsecond=0).strftime('%H:%M:%S')
         return next_time
-    if 16 <= second <= 30:
+    if 11 <= second <= 20:
         next_time = datetime.now()
-        next_time = next_time.replace(second=35,  microsecond=0).strftime('%H:%M:%S')
+        next_time = next_time.replace(second=30,  microsecond=0).strftime('%H:%M:%S')
         return next_time
-    if 30 < second <= 45:
+    if 21 <= second <= 30:
+        next_time = datetime.now()
+        next_time = next_time.replace(second=40,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
+    if 31 <= second <= 40:
         next_time = datetime.now()
         next_time = next_time.replace(second=50,  microsecond=0).strftime('%H:%M:%S')
         return next_time
-    if 45 < second <= 59:
+    if 41 <= second <= 50:
         next_time = datetime.now() + timedelta(minutes=1)
-        next_time = next_time.replace(second=5,  microsecond=0).strftime('%H:%M:%S')
+        next_time = next_time.replace(second=0,  microsecond=0).strftime('%H:%M:%S')
+        return next_time
+    if 51 <= second <= 59:
+        next_time = datetime.now() + timedelta(minutes=1)
+        next_time = next_time.replace(second=10,  microsecond=0).strftime('%H:%M:%S')
         return next_time
 
 # Validate hh:mm:ss time format for t input
@@ -186,11 +194,11 @@ def create_lts_sts_et(length, pl_start, pl_len):
     for i in range(pl_start, pl_len):
         if i == pl_start:
             lts.append(timedelta(seconds=0))
-            sts.append(timedelta(seconds=2))
+            sts.append(timedelta(seconds=1))
         elif i > pl_start:
-            t = sts[-1] + length[-1]
+            t = sts[-1] + length[i-1]
             lts.append(t)
-            sts.append(t + timedelta(seconds=2))
+            sts.append(t + timedelta(seconds=1))
     et = sts[-1] + length[-1]
     return lts, sts, et
 
@@ -209,16 +217,16 @@ def load_runtime_matrix(l, length, pl_start, pl_len):
 
 # Load a music file with pygame.mixer.music
 def load_music(path, title, artist, pos):
-    global sound
-    sound = mixer.Sound(path)
-    # mixer.music.load(path)
+    #global sound
+    #sound = mixer.Sound(path)
+    mixer.music.load(path)
     print(f"Playing {pos}: {title} - {artist}")
     #mixer.music.set_volume(0.9)
 
 # Start playback of music from RAM memory
 def play_music():
-    sound.play()
-    #mixer.music.play()
+    #sound.play()
+    mixer.music.play()
     print(f"At: {datetime.now()}")
     while mixer.get_busy() == True:
         continue
@@ -301,19 +309,26 @@ if __name__ == "__main__":
     print(f"Starting with track: {pl_start} , at: {sched_time}")
     
     scheduler = BlockingScheduler(timezone=timezone) # Create a scheduler
-    sched_time = sched_time - timedelta(seconds=2)
+    sched_time = sched_time - timedelta(seconds=1)
  
     for pos in range(pl_start, pl_len):
         p = path[pos]
         t = title [pos]
         a = artist [pos]
         
-        load_time = sched_time + lts[pos] # lts pl_pos list index out of range JAudioSync.py -p 1
+        load_time = sched_time + lts[pos]
         start_time = sched_time + sts[pos]
-
+        '''
+        # times debugging
+        print(f"lts: {lts[pos]}")
+        print(f"load_time: {load_time}")
+        print(f"sts: {sts[pos]}")
+        print(f"start_time: {start_time}")
+        print(f"length: {length[pos]}")
+        '''        
         scheduler.add_job(load_music, 'date', run_date=load_time, args=[p,t,a,pos])
         scheduler.add_job(play_music, 'date', run_date=start_time)
-    
+
     # Scheduling shutdown after last played track
     end_time = sched_time + et
     scheduler.add_job(end, 'date', run_date=end_time, args=[path, title, artist, length, lts, sts, et])
