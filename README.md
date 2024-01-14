@@ -17,9 +17,10 @@ Syncing NTP time over wireless network first and then start pygame.mixer.music p
 - [Claudiosync](https://claudiosync.de/)
     - Announced plans to publish soon
 
-### How to use  
-- `git clone https://github.com/beautiful-orca/JAudioSync.git`  
-- `cd JAudioSync`  
+### How to use (dev version)
+- `git clone -b dev https://github.com/beautiful-orca/JAudioSync.git`
+- `cd JAudioSync`
+    - get updates: `git pull origin dev`
 - Place mp3 fies in [./Music/](./Music/)  
     - make sure they are mp3 and are properly tagged title, artist and have the property length
 - Use VLC (or similar music player) to create a "m3u8" playlist, eg. party.m3u8, in [./Music/](./Music/)  
@@ -40,43 +41,60 @@ Playing: Oymaldonado Bluesy Rock Guitar 3 Enveloped Reverbed - Timbre
 At: 2024-01-13 00:02:05.000790
 Playing: Remix of Reverendblack Rev Loops Metal Guitar 12 Brighter Buzzier Old 1 - Timbre
 At: 2024-01-13 00:02:16.000901
-[src/libmpg123/id3.c:process_extra():681] error: No extra frame text / valid description?
 Playing: Tweaked Version of Fastdash99s freesound 484749 - Timbre
 At: 2024-01-13 00:02:28.000729
 Playlist finished playing.
 ```
 
 ### ToDo, Future Ideas, Challenges and Notes
-- 46 track playlist generated under 180ms on powerful laptop
-- Need test on Raspi
-    - music playback drifts between Pi 3A+ and Pi 3B+
-    
-- Reduce resource demand
-    - pygame.mixer.init (samplerate/resampling necessary?)
- 
-- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server  
-    - System clock drift needs testing (without network connection) 
-    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
-- GPS Time Sync
-    - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
+- music playback on Pi 3A+ and Pi 3B+ is in sync when starting with synced time
+    - Software clock drifts after a while without network connection
+    - audible when both sources are close to each other
+    - RTC is nessessary
 
-- Stopping music playback on demand (local possible, remote needs to be implemented)
+- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
+    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
+- NTP Server on leader
+    - chrony
+    - sync from pool.ntp.org over mobile phone wifi hotspot with internet
+- forcing resync on `timedatectl`:
+    - `sudo systemctl restart systemd-timesyncd`
+
+- keep script running without active ssh connection
+    - `screen`
+        - detatch Ctrl+Shift+A then D
+        - reattach `screen -r`
+        - "screen works badly with systemd"
+    - `nohup python -u your_code.py`
+    - start with systemd
+        - `systemctl start myPythonScript`
+    - `tmux pythonScript.py`
+        - `tmux attach`
+
+
+- Stopping music playback on demand (local possible: CTRL+C, end() on KeyboardInterrupt)
+    - `pkill -9 -f JAudioSync.py`
+        - does not run end()
+- Server and Client model
+    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member(n)")
+    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames
 - Common interface: distribute commands to all clients at the same time
    - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasm(n)
    - key auth from phone (Termux) to leader to control without need for password
+
+
+- GPS Time Sync (5-10€ per gps module)
+    - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
+    - [https://austinsnerdythings.com/2021/09/29/millisecond-accurate-chrony-ntp-with-a-usb-gps-for-12-usd/](https://austinsnerdythings.com/2021/09/29/millisecond-accurate-chrony-ntp-with-a-usb-gps-for-12-usd/)
 - Maybe rename project
 - Move git to privacy friendly hoster?
 
-- Using Central Wifi Access Point, Raspi hotspot/mesh or mobile Wifi hotspot?  
-    - What if every playing device (raspi) is connected to a mobile phone wifi hotspot to sync ntp.org time seperately
-    - Tailscale VPN connection for network commands (script control)
-- Server and Client model  
-    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member(n)")  
-    - NTP Server on leader
-        - might sync time from internet (mobile (phone) wifi hotspot with 4G internet), de.pool.ntp.org
-    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames  
 
-### Dependencies needed to be installed  
+
+
+
+
+### Dependencies needed to be installed
 I am using Python 3.11.5 in a anaconda venv  
 - [pygame](https://www.pygame.org/docs/ref/mixer.html)
 - [mutagen](https://mutagen.readthedocs.io/)
@@ -102,9 +120,10 @@ I am using Python 3.11.5 in a anaconda venv
 ### Configuration in live system
 - Wifi configuration: 
     - use `sudo raspi-config`
+    - or `/etc/wpa_supplicant/wpa_supplicant.conf`
 - Set Hostname in live system (single word, without domain ".local")
     - use `sudo raspi-config`
-    - `ping hostname.local`  
+    - `ping hostname.local`
 - Volume control
     - amixer -c 1 set Speaker 50%
     - alsamixer (interactive shell)
@@ -129,14 +148,14 @@ card 1: Audio [KM_B2 Digital Audio], device 0: USB Audio [USB Audio]
 card 2: vc4hdmi [vc4-hdmi], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
 ```
 
-#### Disable onboard audio (not needed)  
+#### Disable onboard audio (not needed if card name is used instead of index)
 `sudo nano /etc/modprobe.d/alsa-blacklist.conf`  
 ```
 # Add
 blacklist snd_bcm2835
 ```
 
-##### Set USB Audio as Default Audio Device
+##### Stereo with USB Audio as Default Audio Device
 `sudo nano ~/.asoundrc`
 ```
 pcm.!default {
@@ -150,7 +169,30 @@ ctl.!default {
 }
 ```
 
-#### Mono Channel (optional)
+#### Two Mono Channels
+`~/.asoundrc`
+```
+pcm.!default {
+    type plug
+    slave.pcm "mono"
+}
+
+pcm.mono {
+    type route
+    slave.pcm "hw:Audio"
+    ttable.0.0 0.5  # Left channel to left output
+    ttable.1.0 0.5  # Right channel to left output
+    ttable.0.1 0.5  # Left channel to right output
+    ttable.1.1 0.5  # Right channel to right output
+}
+
+ctl.mono {
+    type hw
+    card Audio
+}
+```
+
+#### Mono Channel (left)
 ```
 pcm.!default {
     type plug
