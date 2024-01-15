@@ -262,6 +262,7 @@ def end(path, title, artist, length, lts, sts, et):
         save_lts_sts_et(lts, sts, et)
         scheduler.shutdown(wait=False)
         mixer.quit()
+        sys.exit(0)
     
 if __name__ == "__main__":
     next_time = get_next_time()
@@ -345,3 +346,4 @@ if __name__ == "__main__":
         print("Script interrupted by user.")
         scheduler.shutdown(wait=False)
         mixer.quit()
+        sys.exit(0)
