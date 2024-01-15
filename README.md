@@ -51,7 +51,6 @@ Playlist finished playing.
     - Software clock drifts after a while without network connection
     - audible when both sources are close to each other
     - RTC is nessessary
-
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
     - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
 - NTP Server on leader
@@ -60,28 +59,31 @@ Playlist finished playing.
 - forcing resync on `timedatectl`:
     - `sudo systemctl restart systemd-timesyncd`
 
-- keep script running without active ssh connection
-    - `screen`
-        - detatch Ctrl+Shift+A then D
-        - reattach `screen -r`
-        - "screen works badly with systemd"
-    - `nohup python -u your_code.py`
-    - start with systemd
-        - `systemctl start myPythonScript`
-    - `tmux pythonScript.py`
-        - `tmux attach`
+- keep script running
+    - install sshpass
+    - with tmux the terminal session can be kept up
+    - `sshpass -p secret ssh jas@jasl.local "tmux new-session -d -s jasl 'cd JAudioSync && python3 JAudioSync.py'"`
+    - `sshpass -p secret ssh jas@jasm1.local "tmux new-session -d -s jasm1 'cd JAudioSync && python3 JAudioSync.py'"`
+    - manually view session: 
+    - `sshpass -p secret ssh jas@jasl.local` `tmux attach-session -t jasl`
+    - `sshpass -p secret ssh jas@jasm1.local` `tmux attach-session -t jasm1`
+- Stopping music playback on demand
+    - `sshpass -p secret ssh jas@jasl.local 'tmux send-keys -t jasl "pkill -2 -f JAudioSync.py" C-m'`
+    - `sshpass -p secret ssh jas@jasm1.local 'tmux send-keys -t jasm1 "pkill -2 -f JAudioSync.py" C-m'`
+- Volume control
+    - `alsamixer` (interactive shell), identify audio cards
+    - amixer -c "Audio" set PCM 25%
+    - use "Headphones" when using analog audio
+
+    - `sshpass -p secret ssh jas@jasl.local "amixer -c "Audio" set PCM 25%"`
+    - `sshpass -p secret ssh jas@jasl.local "amixer -c "Audio" set PCM 25%"`
 
 
-- Stopping music playback on demand (local possible: CTRL+C, end() on KeyboardInterrupt)
-    - `pkill -9 -f JAudioSync.py`
-        - does not run end()
 - Server and Client model
     - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member(n)")
     - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames
 - Common interface: distribute commands to all clients at the same time
-   - ssh password auth, common password to add all hostnames found with pattern, eg jasm1, jasm2, jasm(n)
-   - key auth from phone (Termux) to leader to control without need for password
-
+   - hostname pattern, eg jasm1, jasm2, jasm(n)
 
 - GPS Time Sync (5-10€ per gps module)
     - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
@@ -99,6 +101,7 @@ I am using Python 3.11.5 in a anaconda venv
 - [pygame](https://www.pygame.org/docs/ref/mixer.html)
 - [mutagen](https://mutagen.readthedocs.io/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
+- tmux
 
 ### Install and use on (multiple) Raspberry Pi 3 
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
@@ -111,11 +114,7 @@ I am using Python 3.11.5 in a anaconda venv
     - Enable ssh password authentication  
     - `ssh jas@jasl.local`
     - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git python3-pygame python3-mutagen python3-apscheduler`
-    - `python --version`
-    - `cd ~/`
-    - `git clone https://github.com/beautiful-orca/JAudioSync.git`
-    - `cd JAudioSync`
+    - `sudo apt install git tmux python3 python3-pygame python3-mutagen python3-apscheduler`
     
 ### Configuration in live system
 - Wifi configuration: 
@@ -124,23 +123,10 @@ I am using Python 3.11.5 in a anaconda venv
 - Set Hostname in live system (single word, without domain ".local")
     - use `sudo raspi-config`
     - `ping hostname.local`
-- Volume control
-    - amixer -c 1 set Speaker 50%
-    - alsamixer (interactive shell)
 
-### Audio Setup
-
-#### Test sounds
-```
-wget https://www.kozco.com/tech/piano2.wav
-aplay piano2.wav
-```
-
-`speaker-test -c 1`
-
-#### Find USB-AUDIO device:
-`aplay -l`
-
+### Audio Setup (USB Audio)
+- Test sounds: `speaker-test -c 1`
+- Find USB-AUDIO device: `aplay -l`
 ```
 **** List of PLAYBACK Hardware Devices ****
 card 0: Headphones [bcm2835 Headphones], device 0: bcm2835 Headphones [bcm2835 Headphones]
@@ -148,7 +134,8 @@ card 1: Audio [KM_B2 Digital Audio], device 0: USB Audio [USB Audio]
 card 2: vc4hdmi [vc4-hdmi], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
 ```
 
-#### Disable onboard audio (not needed if card name is used instead of index)
+#### (optional) Disable onboard analog audio
+- Avoid conflicts for default device when using USB Audio
 `sudo nano /etc/modprobe.d/alsa-blacklist.conf`  
 ```
 # Add
