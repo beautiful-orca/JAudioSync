@@ -1,0 +1,18 @@
+pcm.!default {
+    type plug
+    slave.pcm "mono"
+}
+
+pcm.mono {
+    type route
+    slave.pcm "hw:Audio"
+    ttable.0.0 0.5  # Left channel to left output
+    ttable.1.0 0.5  # Right channel to left output
+    ttable.0.1 0.5  # Left channel to right output
+    ttable.1.1 0.5  # Right channel to right output
+}
+
+ctl.mono {
+    type hw
+    card Audio
+}

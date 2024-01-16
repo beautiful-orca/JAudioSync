@@ -4,27 +4,22 @@ Project is in **very early developement!** :cowboy_hat_face:
 Play a (m3u8) playlist of music in perfect sync on multiple devices.  
 Syncing NTP time over wireless network first and then start pygame.mixer.music playback at exact choosen time (using apscheduler), which then doesn't need network anymore because it depends on system clock. RTC (RealTimeClock) helps keeping correct time.  
 
-**Example music with different license is present at ./Music at the moment**  
-- See [./Music/music_license.md](./Music/music_license.md)  
-
 ### Use Cases
 [Critical Mass Bike Ride](https://en.wikipedia.org/wiki/Critical_Mass_(cycling))
    - Multiple speakers distributed on Cargo Bikes and trailers
-   - Moving with changing conditions which make a network dependant solution hard or costly to implement (Mesh Wifi problems)
+   - Moving with changing conditions, mostly network independant solution
    - [CM Duisburg](https://criticalmass.in/duisburg)
-
-### Similar Projects
+#### Similar Projects
 - [Claudiosync](https://claudiosync.de/)
     - Announced plans to publish soon
 
-### How to use (dev version)
-- `git clone -b dev https://github.com/beautiful-orca/JAudioSync.git`
+### How to use
+- `git clone https://github.com/beautiful-orca/JAudioSync.git`
+    - cloning dev branch: `git clone -b dev https://github.com/beautiful-orca/JAudioSync.git`
 - `cd JAudioSync`
     - get updates: `git pull origin dev`
-- Place mp3 fies in [./Music/](./Music/)  
-    - make sure they are mp3 and are properly tagged title, artist and have the property length
-- Use VLC (or similar music player) to create a "m3u8" playlist, eg. party.m3u8, in [./Music/](./Music/)  
-- Run: `python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
+
+`python JAudioSync.py [-h] [-t 18:55:00] [-p 0 | res] [-l | -playlist_name Playlist]`
     - `-t`, optional: Time the playback should be scheduled today in the format hh:mm:ss, default: in 5-20 seconds (at 5,20,35,50)  
     - `-p`, optional: Start track number in playlist, 0 - (number of tracks), or "res" to resume from last played track, default: starting from 0  
     - `-l`, optional flag: Fast-loading last saved playlist (when present), default: reading new playlist from storage
@@ -53,37 +48,100 @@ Playlist finished playing.
     - RTC is nessessary
 - Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
     - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
-- NTP Server on leader
-    - chrony
-    - sync from pool.ntp.org over mobile phone wifi hotspot with internet
-- forcing resync on `timedatectl`:
-    - `sudo systemctl restart systemd-timesyncd`
+    - Enable I2C and rtc:
+        - config.txt: dtparam=i2c_arm=on ; i2c-dev ; dtoverlay=i2c-rtc,ds3231
+        - add to install_pi.sh
+```
+if ! grep -q "dtparam=i2c_arm=on" /boot/config.txt; then
+    echo "dtparam=i2c_arm=on" | sudo tee -a /boot/config.txt
+fi
 
+if ! grep -q "dtoverlay=i2c-dev" /boot/config.txt; then
+    echo "dtoverlay=i2c-dev" | sudo tee -a /boot/config.txt
+fi
+```
+```
+#!/bin/bash
+
+config_file="/boot/config.txt"
+rtc_overlay="dtoverlay=i2c-rtc,ds3231"
+
+# Check if the line is already present in the config.txt file
+if grep -q "$rtc_overlay" "$config_file"; then
+    echo "The line '$rtc_overlay' is already present in $config_file."
+    read -p "Do you want to remove it? (yes/no): " choice
+    if [[ $choice == "yes" ]]; then
+        sudo sed -i "/$rtc_overlay/d" "$config_file"
+        echo "Line removed. Rebooting..."
+        sudo reboot
+    else
+        echo "No changes made."
+    fi
+else
+    read -p "The line '$rtc_overlay' is not present. Do you want to add it? (yes/no): " choice
+    if [[ $choice == "yes" ]]; then
+        echo "$rtc_overlay" | sudo tee -a "$config_file"
+        echo "Line added. Rebooting..."
+        sudo reboot
+    else
+        echo "No changes made."
+    fi
+fi
+```
+
+
+
+- NTP
+    - internet ntp sync via mobile phone wifi hotspot
+    - `sudo timedatectl timesync-status`
+    - `timedatectl status`
+
+- install_pi.sh , install all dependencies and services
+    - `update_time_autostart.service`
+    - `autostart_gpio_checker.sh`
+
+- update_time_autostart.service , systemd service, runs after wifi is connected
+
+- Autostart based on jumper on GPIO
+    - autostart script if GPIO 26 is connected to ground with a jumper
+autostart_gpio_checker.sh
+```
+tmux new-session -d -s $host
+tmux send-keys -t $host "cd JAudioSync" C-m
+    tmux send-keys -t $host "python3 JAudioSync.py"C-m
+```
+
+
+- control script(s)
+    - python parallel-ssh
+    - jas0, jas1, ...; host parameter `-h 0`
+- tmux session is present if using autostart
+    - otherwise create a new session with name=hostname
+    - create_session.py
+    - `sshpass -p secret ssh jas@($host).local 'tmux new-session -d -s $host'`
 - keep script running
-    - install sshpass
+    - install sshpass on controlling device
     - with tmux the terminal session can be kept up
-    - `sshpass -p secret ssh jas@jasl.local "tmux new-session -d -s jasl 'cd JAudioSync && python3 JAudioSync.py'"`
-    - `sshpass -p secret ssh jas@jasm1.local "tmux new-session -d -s jasm1 'cd JAudioSync && python3 JAudioSync.py'"`
-    - manually view session: 
-    - `sshpass -p secret ssh jas@jasl.local` `tmux attach-session -t jasl`
-    - `sshpass -p secret ssh jas@jasm1.local` `tmux attach-session -t jasm1`
-- Stopping music playback on demand
-    - `sshpass -p secret ssh jas@jasl.local 'tmux send-keys -t jasl "pkill -2 -f JAudioSync.py" C-m'`
-    - `sshpass -p secret ssh jas@jasm1.local 'tmux send-keys -t jasm1 "pkill -2 -f JAudioSync.py" C-m'`
-- Volume control
-    - `alsamixer` (interactive shell), identify audio cards
-    - amixer -c "Audio" set PCM 25%
-    - use "Headphones" when using analog audio
 
-    - `sshpass -p secret ssh jas@jasl.local "amixer -c "Audio" set PCM 25%"`
-    - `sshpass -p secret ssh jas@jasl.local "amixer -c "Audio" set PCM 25%"`
-
-
-- Server and Client model
-    - Auto-discovery, based on hostnames (server "leader" scans for hostnames "member(n)")
-    - Command control server, "leader" copies comands it gets and distributes them to every member by discovered hostnames
-- Common interface: distribute commands to all clients at the same time
-   - hostname pattern, eg jasm1, jasm2, jasm(n)
+- start.py
+    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host "python3 JAudioSync.py" C-m'`
+    - add custom options parsing
+- stop.py
+    - pkill: `"pkill -2 -f JAudioSync.py"`
+    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host  C-c'`
+- resume.py
+    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host "python3 JAudioSync.py -p res -l" C-m'`
+- volume.py -i [- v 25 | -up | -dn]
+    - i = interface [Audio | Headphones]
+        - USB Audio or analog
+    - -v volume % ; set PCM 25%
+    - -up = volume up by ; set PCM 5%+
+    - -dn = volume down by ; set PCM 5%-
+    - `sshpass -p secret ssh jas@$host.local "amixer -c "$i" set PCM ($v)%($c)"`
+- manually view session:
+    - view_session.sh
+    - `sshpass -p secret ssh jas@($host).local`
+    - `tmux attach-session -t $host`
 
 - GPS Time Sync (5-10€ per gps module)
     - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
@@ -92,109 +150,57 @@ Playlist finished playing.
 - Move git to privacy friendly hoster?
 
 
-
-
-
-
-### Dependencies needed to be installed
-I am using Python 3.11.5 in a anaconda venv  
+### Based on
+- [Python 3](https://www.python.org/)
 - [pygame](https://www.pygame.org/docs/ref/mixer.html)
 - [mutagen](https://mutagen.readthedocs.io/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
-- tmux
+- [tmux](https://github.com/tmux/tmux/wiki)
 
-### Install and use on (multiple) Raspberry Pi 3 
+### Install and use on Raspberry Pi
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
-- Install Pi OS Lite 64bit with Raspberry Pi Imager  
-    - 3 B+ as leader and 3 A+ as member in my case
-    - Set hostname for "leader" and "member[n]" jasl, jasm1
+- Install Pi OS Lite 64bit with Raspberry Pi Imager
+    - Set hostname jas
     - set username and password, jas:secret  
-    - Wifi config with internet access or use wired internet for install and update  
+    - Wifi config: Hotspot:jassecret
     - Set locale  
-    - Enable ssh password authentication  
-    - `ssh jas@jasl.local`
-    - `sudo apt update && sudo apt upgrade`
-    - `sudo apt install git tmux python3 python3-pygame python3-mutagen python3-apscheduler`
+    - Enable ssh password authentication
+- Place mp3 and m3u8 fies in [./Music/](./Music/)  
+    - make sure music is mp3 and is tagged with title, artist(, comment)  and has the property length
+    - Use VLC (or similar music player) to create a "m3u8" playlist, eg. Playlist.m3u8, in [./Music/](./Music/)
+
+- Configure system
+    - `ssh jas@jas.local`
+    - `sudo apt -y install git`
+    - `git clone https://github.com/beautiful-orca/JAudioSync.git`
+    - `cd JAudioSync`
+    - `./install_pi.sh`
+        - choose USB Audio or headphones
+    - optional push prepared Music folder: 
+        - `exit` first
+        - `sshpass -p secret scp -r ~/Music jas@jas.local:/home/jas/JAudioSync/Music`
+        - back to: `ssh jas@jas.local`
+    - `sudo raspi-config`
+        - Set hostname jas0 , jas1, jas3, ...
+        - change Wifi
+    - Install jumper cable GPIO 26 to ground
+    - `sudo reboot now`
     
-### Configuration in live system
-- Wifi configuration: 
-    - use `sudo raspi-config`
-    - or `/etc/wpa_supplicant/wpa_supplicant.conf`
-- Set Hostname in live system (single word, without domain ".local")
-    - use `sudo raspi-config`
-    - `ping hostname.local`
+### Distribute prepared image?
+- flash with imager
+- copy mp3 and playlist to folder
+- `ssh jas@jas.local`
+- optional push prepared Music folder: 
+        - `exit` first
+        - `sshpass -p secret scp -r ~/Music jas@jas.local:/home/jas/JAudioSync/Music`
+        - back to: `ssh jas@jas.local`
+- `sudo raspi-config`
+    - Set hostname jas0 , jas1, jas3, ...
+- Optional: USB Audio ./audio_config-md
+- Install jumper cable GPIO 26 to ground
+    - `sudo reboot now`
 
-### Audio Setup (USB Audio)
-- Test sounds: `speaker-test -c 1`
-- Find USB-AUDIO device: `aplay -l`
-```
-**** List of PLAYBACK Hardware Devices ****
-card 0: Headphones [bcm2835 Headphones], device 0: bcm2835 Headphones [bcm2835 Headphones]
-card 1: Audio [KM_B2 Digital Audio], device 0: USB Audio [USB Audio]
-card 2: vc4hdmi [vc4-hdmi], device 0: MAI PCM i2s-hifi-0 [MAI PCM i2s-hifi-0]
-```
-
-#### (optional) Disable onboard analog audio
-- Avoid conflicts for default device when using USB Audio
-`sudo nano /etc/modprobe.d/alsa-blacklist.conf`  
-```
-# Add
-blacklist snd_bcm2835
-```
-
-##### Stereo with USB Audio as Default Audio Device
-`sudo nano ~/.asoundrc`
-```
-pcm.!default {
-   type hw
-   card Audio
-}
-
-ctl.!default {
-   type hw
-   card Audio
-}
-```
-
-#### Two Mono Channels
-`~/.asoundrc`
-```
-pcm.!default {
-    type plug
-    slave.pcm "mono"
-}
-
-pcm.mono {
-    type route
-    slave.pcm "hw:Audio"
-    ttable.0.0 0.5  # Left channel to left output
-    ttable.1.0 0.5  # Right channel to left output
-    ttable.0.1 0.5  # Left channel to right output
-    ttable.1.1 0.5  # Right channel to right output
-}
-
-ctl.mono {
-    type hw
-    card Audio
-}
-```
-
-#### Mono Channel (left)
-```
-pcm.!default {
-    type plug
-    slave.pcm "mono"
-}
-
-pcm.mono {
-    type route
-    slave.pcm "hw:Audio"
-    ttable.0.0 1  # Left channel to left channel
-    ttable.1.0 1  # Right channel to left channel
-}
-
-ctl.mono {
-    type hw
-    card Audio
-}
-```
+### Thanks
+- All components and their developers
+- Chris
+- People of Hackspace Duisburg: [https://www.space47.ruhr/](https://www.space47.ruhr/)

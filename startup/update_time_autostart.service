@@ -1,0 +1,10 @@
+[Unit]
+Description=update time and run GPIO checker for autostart after WiFi is connected
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c "/bin/sleep 5 && /usr/bin/sudo /bin/systemctl restart systemd-timesyncd && /bin/sleep 10 && /usr/bin/sudo /bin/timedatectl set-ntp false && /bin/bash /usr/local/bin/autostart_gpio_checker.sh"
+
+[Install]
+WantedBy=multi-user.target
