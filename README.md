@@ -46,91 +46,70 @@ Playlist finished playing.
     - Software clock drifts after a while without network connection
     - audible when both sources are close to each other
     - RTC is nessessary
-- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
-    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
-    - Enable I2C and rtc:
-        - config.txt: dtparam=i2c_arm=on ; i2c-dev ; dtoverlay=i2c-rtc,ds3231
-        - add to install_pi.sh
-```
-if ! grep -q "dtparam=i2c_arm=on" /boot/config.txt; then
-    echo "dtparam=i2c_arm=on" | sudo tee -a /boot/config.txt
-fi
-
-if ! grep -q "dtoverlay=i2c-dev" /boot/config.txt; then
-    echo "dtoverlay=i2c-dev" | sudo tee -a /boot/config.txt
-fi
-```
-```
-#!/bin/bash
-
-config_file="/boot/config.txt"
-rtc_overlay="dtoverlay=i2c-rtc,ds3231"
-
-# Check if the line is already present in the config.txt file
-if grep -q "$rtc_overlay" "$config_file"; then
-    echo "The line '$rtc_overlay' is already present in $config_file."
-    read -p "Do you want to remove it? (yes/no): " choice
-    if [[ $choice == "yes" ]]; then
-        sudo sed -i "/$rtc_overlay/d" "$config_file"
-        echo "Line removed. Rebooting..."
-        sudo reboot
-    else
-        echo "No changes made."
-    fi
-else
-    read -p "The line '$rtc_overlay' is not present. Do you want to add it? (yes/no): " choice
-    if [[ $choice == "yes" ]]; then
-        echo "$rtc_overlay" | sudo tee -a "$config_file"
-        echo "Line added. Rebooting..."
-        sudo reboot
-    else
-        echo "No changes made."
-    fi
-fi
-```
-
-
-
 - NTP
     - internet ntp sync via mobile phone wifi hotspot
     - `sudo timedatectl timesync-status`
     - `timedatectl status`
+- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
+    - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
+    - [https://learn.adafruit.com/adding-a-real-time-clock-to-raspberry-pi/set-rtc-time](https://learn.adafruit.com/adding-a-real-time-clock-to-raspberry-pi/set-rtc-time)
+    - install_pi.sh:
+        - `raspi-config` enable I2C and config.txt: dtoverlay=i2c-rtc,ds3231
+        - `sudo apt-get -y remove fake-hwclock`
+        - `sudo update-rc.d -f fake-hwclock remove`
+        - `sudo systemctl disable fake-hwclock`
+
+https://github.com/rgl/rtc-i2c-ds3231-rpi
+https://github.com/skiselev/rpi_rtc_ds3231
+https://spellfoundry.com/docs/setting-up-the-real-time-clock-on-raspbian-jessie-or-stretch/
+
+
+
+
+Run sudo nano /lib/udev/hwclock-set and comment out these three lines:
+
+#if [ -e /run/systemd/system ] ; then
+# exit 0
+#fi
+
+Also comment out the two lines
+
+/sbin/hwclock --rtc=$dev --systz --badyear
+/sbin/hwclock --rtc=$dev --systz
+
+
+
+sudo systemctl restart systemd-timesyncd
+hwclock -w
+
 
 - install_pi.sh , install all dependencies and services
     - `update_time_autostart.service`
+        - runs after wifi is connected
     - `autostart_gpio_checker.sh`
-
-- update_time_autostart.service , systemd service, runs after wifi is connected
-
-- Autostart based on jumper on GPIO
-    - autostart script if GPIO 26 is connected to ground with a jumper
-autostart_gpio_checker.sh
-```
-tmux new-session -d -s $host
-tmux send-keys -t $host "cd JAudioSync" C-m
-    tmux send-keys -t $host "python3 JAudioSync.py"C-m
-```
-
+        - initiates tmux session
+        - starts JAudioSync if GPIO 26 is connected to ground with a jumper
 
 - control script(s)
     - python parallel-ssh
     - jas0, jas1, ...; host parameter `-h 0`
 - tmux session is present if using autostart
-    - otherwise create a new session with name=hostname
+    - otherwise create a new session
     - create_session.py
-    - `sshpass -p secret ssh jas@($host).local 'tmux new-session -d -s $host'`
+    - if not tmux has-session -t $host
+    - `sshpass -p secret ssh jas@$host.local 'tmux new-session -d -s $host'`
 - keep script running
     - install sshpass on controlling device
     - with tmux the terminal session can be kept up
 
 - start.py
-    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host "python3 JAudioSync.py" C-m'`
+    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py" C-m'`
     - add custom options parsing
 - stop.py
     - pkill: `"pkill -2 -f JAudioSync.py"`
-    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host  C-c'`
+    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host  C-c'`
 - resume.py
-    - `sshpass -p secret ssh jas@($host).local 'tmux send-keys -t $host "python3 JAudioSync.py -p res -l" C-m'`
+    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py -p res -l" C-m'`
 - volume.py -i [- v 25 | -up | -dn]
     - i = interface [Audio | Headphones]
         - USB Audio or analog
@@ -140,7 +119,7 @@ tmux send-keys -t $host "cd JAudioSync" C-m
     - `sshpass -p secret ssh jas@$host.local "amixer -c "$i" set PCM ($v)%($c)"`
 - manually view session:
     - view_session.sh
-    - `sshpass -p secret ssh jas@($host).local`
+    - `sshpass -p secret ssh jas@$host.local`
     - `tmux attach-session -t $host`
 
 - GPS Time Sync (5-10€ per gps module)
@@ -169,6 +148,9 @@ tmux send-keys -t $host "cd JAudioSync" C-m
     - make sure music is mp3 and is tagged with title, artist(, comment)  and has the property length
     - Use VLC (or similar music player) to create a "m3u8" playlist, eg. Playlist.m3u8, in [./Music/](./Music/)
 
+
+sudo rpi-update
+
 - Configure system
     - `ssh jas@jas.local`
     - `sudo apt -y install git`
@@ -180,9 +162,9 @@ tmux send-keys -t $host "cd JAudioSync" C-m
         - `exit` first
         - `sshpass -p secret scp -r ~/Music jas@jas.local:/home/jas/JAudioSync/Music`
         - back to: `ssh jas@jas.local`
-    - `sudo raspi-config`
-        - Set hostname jas0 , jas1, jas3, ...
-        - change Wifi
+    - Set hostname jas0 , jas1, jas3, ...
+        - `sudo raspi-config nonint do_hostname <hostname>`
+    - change Wifi: `sudo raspi-config nonint do_wifi_ssid_passphrase <ssid> <passphrase>`
     - Install jumper cable GPIO 26 to ground
     - `sudo reboot now`
     
@@ -194,11 +176,12 @@ tmux send-keys -t $host "cd JAudioSync" C-m
         - `exit` first
         - `sshpass -p secret scp -r ~/Music jas@jas.local:/home/jas/JAudioSync/Music`
         - back to: `ssh jas@jas.local`
-- `sudo raspi-config`
-    - Set hostname jas0 , jas1, jas3, ...
-- Optional: USB Audio ./audio_config-md
+- Set hostname jas0 , jas1, jas3, ...
+        - `sudo raspi-config nonint do_hostname <hostname>`
+    - change Wifi: `sudo raspi-config nonint do_wifi_ssid_passphrase <ssid> <passphrase>`
+- Optional: USB Audio ./audio_config-md or run `./install_pi.sh`
 - Install jumper cable GPIO 26 to ground
-    - `sudo reboot now`
+- `sudo reboot now`
 
 ### Thanks
 - All components and their developers
