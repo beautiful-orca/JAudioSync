@@ -46,85 +46,154 @@ Playlist finished playing.
     - Software clock drifts after a while without network connection
     - audible when both sources are close to each other
     - RTC is nessessary
+- raspi-config & noint: https://github.com/raspberrypi/documentation/blob/develop/documentation/asciidoc/computers/configuration/raspi-config.adoc
+- Volume Control with buttons
+    - GPIO, controls amixer
 - NTP
     - internet ntp sync via mobile phone wifi hotspot
     - `sudo timedatectl timesync-status`
     - `timedatectl status`
-- Add DS3231 Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
+    - dmesg -T | grep clock
+- Add DS3231SN Real Time Clock Module to avoid system clock drift when without network connection to NTP Server
     - [https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi](https://www.berrybase.de/ds3231-real-time-clock-modul-fuer-raspberry-pi)
     - [https://learn.adafruit.com/adding-a-real-time-clock-to-raspberry-pi/set-rtc-time](https://learn.adafruit.com/adding-a-real-time-clock-to-raspberry-pi/set-rtc-time)
-    - install_pi.sh:
-        - `raspi-config` enable I2C and config.txt: dtoverlay=i2c-rtc,ds3231
-        - `sudo apt-get -y remove fake-hwclock`
-        - `sudo update-rc.d -f fake-hwclock remove`
-        - `sudo systemctl disable fake-hwclock`
-
-https://github.com/rgl/rtc-i2c-ds3231-rpi
-https://github.com/skiselev/rpi_rtc_ds3231
-https://spellfoundry.com/docs/setting-up-the-real-time-clock-on-raspbian-jessie-or-stretch/
+    
+    - https://github.com/skiselev/rpi_rtc_ds3231
+    - https://spellfoundry.com/docs/setting-up-the-real-time-clock-on-raspbian-jessie-or-stretch/
 
 
+- install_pi.sh
+    - !!! chmod +x scripts
+    - install all dependencies and services
+    - copy and enable services
+        - `autostart.service`
+            - runs after wifi is connected
+            - executes bash script
+        - `autostart.sh`
+            - sets up time
+            - initiates tmux session
+            - starts JAudioSync
+    - in case of rtc option
+        - enable I2C
+        - enable rtc module: dtoverlay=i2c-rtc,ds3231
+        - disable fake-hwclock:
+        - comment out lines in /lib/udev/hwclock-set
+        - add cronjob setting system time from RTC every 5 minutes `hwclock -hctosys`
+    - in case of no rtc
+        - disable I2C
+        - disable rtc module: dtoverlay=i2c-rtc,ds3231
+        - re-enable fake-hwclock:
+        - uncomment in `/lib/udev/hwclock-set`
+        - disable cronjob hwclock
+    - in case of gps:
+        - ntpd waits for gps fix (at least 1) until it accepts time
 
 
-Run sudo nano /lib/udev/hwclock-set and comment out these three lines:
+- GPS Time Sync (5-10€ per gps module, u-blox NEO-6M, better with pps pin)
+    - u-blox NEO-6M via UART but without PPS pin
+    - VCC to Pin 1, which is 3.3v
+    - TX to Pin 10, which is RX (GPIO15)
+    - RX to Pin 8, Which is TX (GPIO14)
+    - Gnd to Pin 6, which is Gnd
+    - timedatectl set-ntp true
+    - enable serial port: `sudo raspi-config nonint do_serial_hw 0`
+    - Turn Off the debug Serial Console: `sudo raspi-config nonint do_serial_cons 1`
+    - `dtoverlay=disable-bt`
+        - if ! grep -q "^dtoverlay=disable-bt$" /boot/config.txt; then
+            - echo "dtoverlay=disable-bt" | sudo tee -a /boot/config.txt
+    - `sudo systemctl disable hciuart --now`
+    - `sudo systemctl disable bluetooth.service --now`
+    - `sudo apt install gpsd gpsd-clients python-gps chrony`
+    - `cat /dev/ttyAMA0`
+    - `stty -F /dev/ttyAMA0 9600`
+    - `sudo gpsd /dev/ttyAMA0 -F /var/run/gpsd.sock`
+    - `cgps -s`
+    - `sudo nano /etc/default/gpsd`
+        ```
+        # Start the gpsd daemon automatically at boot time
+        START_DAEMON="true"
+        DEVICES="/dev/ttyAMA0"
+        GPSD_OPTIONS="-n -G"
+        ```
+    - `sudo systemctl enable gpsd --now`
+    - disable conflicting timesyncd
+        - `sudo systemctl disable systemd-timesyncd --now`
 
-#if [ -e /run/systemd/system ] ; then
-# exit 0
-#fi
+    - /etc/chrony/chrony.conf or /etc/chrony.conf
+```
+# Record the rate at which the system clock gains/losses time.
+driftfile /var/lib/chrony/drift
 
-Also comment out the two lines
+# Allow the system clock to be stepped in the first three updates
+# if its offset is larger than 1 second.
+makestep 1.0 3
 
-/sbin/hwclock --rtc=$dev --systz --badyear
-/sbin/hwclock --rtc=$dev --systz
+pool pool.ntp.org iburst
+
+allow all
+
+refclock SHM 0 refid NMEA precision 1e-3 offset 0.125
+```
+
+    - `refid GPS precision 1e-3 offset 0.125`
+    - `offset 0.0424 delay 0.2`
+    - `poll 2 offset 0.128`
+    - `stratum 0`
+
+    - `sudo systemctl enable chrony --now`
+
+    - `sudo systemctl status chronyd`
+    - `chronyc sources`
+    - `chronyc tracking`
+    - `sudo chronyc makestep` forces your system clock to immediately sync with the Chrony time
 
 
 
-sudo systemctl restart systemd-timesyncd
-hwclock -w
+- Hardware control via GPIO buttons
+    - Volume up
+    - Volume Down
+    - Start
+    - Stop
 
-
-- install_pi.sh , install all dependencies and services
-    - `update_time_autostart.service`
-        - runs after wifi is connected
-    - `autostart_gpio_checker.sh`
-        - initiates tmux session
-        - starts JAudioSync if GPIO 26 is connected to ground with a jumper
-
-- control script(s)
-    - python parallel-ssh
+- network control script(s)
+    - python parallel-ssh (https://pypi.org/project/parallel-ssh/)
+    - 
     - jas0, jas1, ...; host parameter `-h 0`
 - tmux session is present if using autostart
     - otherwise create a new session
     - create_session.py
     - if not tmux has-session -t $host
-    - `sshpass -p secret ssh jas@$host.local 'tmux new-session -d -s $host'`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local 'tmux new-session -d -s $host'`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local 'tmux new-session -d -s jas0'`
 - keep script running
     - install sshpass on controlling device
     - with tmux the terminal session can be kept up
-
 - start.py
-    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py" C-m'`
     - add custom options parsing
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py" C-m'`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local 'tmux send-keys -t jas0 "python3 JAudioSync.py" C-m'`
 - stop.py
     - pkill: `"pkill -2 -f JAudioSync.py"`
-    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host  C-c'`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local 'tmux send-keys -t $host  C-c'`
 - resume.py
-    - `sshpass -p secret ssh jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py -p res -l" C-m'`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local 'tmux send-keys -t $host "python3 JAudioSync.py -p res -l" C-m'`
 - volume.py -i [- v 25 | -up | -dn]
     - i = interface [Audio | Headphones]
         - USB Audio or analog
     - -v volume % ; set PCM 25%
     - -up = volume up by ; set PCM 5%+
     - -dn = volume down by ; set PCM 5%-
-    - `sshpass -p secret ssh jas@$host.local "amixer -c "$i" set PCM ($v)%($c)"`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local "amixer -c "$i" set PCM ($v)%($c)"`
 - manually view session:
     - view_session.sh
-    - `sshpass -p secret ssh jas@$host.local`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local`
     - `tmux attach-session -t $host`
+    - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local`
+    - `tmux attach-session -t jas0`
 
-- GPS Time Sync (5-10€ per gps module)
-    - [https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network](https://www.haraldkreuzer.net/en/news/using-gps-module-set-correct-time-raspberry-pi-3-a-plus-without-network)
-    - [https://austinsnerdythings.com/2021/09/29/millisecond-accurate-chrony-ntp-with-a-usb-gps-for-12-usd/](https://austinsnerdythings.com/2021/09/29/millisecond-accurate-chrony-ntp-with-a-usb-gps-for-12-usd/)
+
+
+
 - Maybe rename project
 - Move git to privacy friendly hoster?
 
