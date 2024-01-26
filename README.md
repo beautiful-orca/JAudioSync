@@ -90,6 +90,7 @@ Playlist finished playing.
 
 
 - GPS Time Sync (5-10€ per gps module, u-blox NEO-6M, better with pps pin)
+    - **NOT FINISHED**
     - u-blox NEO-6M via UART but without PPS pin
     - VCC to Pin 1, which is 3.3v
     - TX to Pin 10, which is RX (GPIO15)
@@ -119,22 +120,10 @@ Playlist finished playing.
     - disable conflicting timesyncd
         - `sudo systemctl disable systemd-timesyncd --now`
 
-    - /etc/chrony/chrony.conf or /etc/chrony.conf
-```
-# Record the rate at which the system clock gains/losses time.
-driftfile /var/lib/chrony/drift
-
-# Allow the system clock to be stepped in the first three updates
-# if its offset is larger than 1 second.
-makestep 1.0 3
-
-pool pool.ntp.org iburst
-
-allow all
-
-refclock SHM 0 refid NMEA precision 1e-3 offset 0.125
-```
-
+    - chrony.conf /etc/chrony/chrony.conf
+    - `pool pool.ntp.org iburst`
+    - `allow all`
+    - `refclock SHM 0 refid NMEA precision 1e-3 offset 0.125`
     - `refid GPS precision 1e-3 offset 0.125`
     - `offset 0.0424 delay 0.2`
     - `poll 2 offset 0.128`
