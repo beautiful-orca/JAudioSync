@@ -147,7 +147,7 @@ Playlist finished playing.
 - network control script(s)
     - python parallel-ssh (https://pypi.org/project/parallel-ssh/)
     - 
-    - jas0, jas1, ...; host parameter `-h 0`
+    - jas0, jas1, ...; host parameter `-j 0`
 - tmux session is present if using autostart
     - otherwise create a new session
     - create_session.py
@@ -176,7 +176,10 @@ Playlist finished playing.
 - manually view session:
     - view_session.sh
     - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@$host.local`
-    - `tmux attach-session -t $host`
+sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local
+sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas1.local
+
+    - `tmux attach-session -t jas`
     - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local`
     - `tmux attach-session -t jas0`
 
@@ -193,6 +196,7 @@ Playlist finished playing.
 - [mutagen](https://mutagen.readthedocs.io/)
 - [apscheduler](https://apscheduler.readthedocs.io/en/latest/)
 - [tmux](https://github.com/tmux/tmux/wiki)
+- [parallel-ssh](https://parallel-ssh.readthedocs.io/en/latest/index.html)
 
 ### Install and use on Raspberry Pi
 (Other Linux installs similar, use e.g. balena-etcher to flash and config files on flash memory)  
@@ -213,6 +217,7 @@ sudo rpi-update
     - `ssh jas@jas.local`
     - `sudo apt -y install git-all`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
+        - `git clone -b dev https://github.com/beautiful-orca/JAudioSync.git`
     - `cd JAudioSync`
     - `./install_pi.sh`
         - choose USB Audio or headphones

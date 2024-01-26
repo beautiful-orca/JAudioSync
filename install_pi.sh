@@ -3,7 +3,7 @@ echo "Installing packages and services for JAudioSync"
 
 sudo apt update
 sudo apt upgrade -y
-sudo apt -y install tmux python3 python3-pygame python3-mutagen python3-apscheduler
+sudo apt -y install tmux python3 python3-pygame python3-mutagen python3-apscheduler python3-parallel-ssh
 
 read -p "Do you use a USB DAC audio interface? (yes/no): " dac_opt
 
