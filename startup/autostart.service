@@ -1,5 +1,5 @@
 [Unit]
-Description=update time and run GPIO checker for autostart after WiFi is connected
+Description=Run JAudioSync autostart script after network is online
 After=network-online.target
 
 [Service]
