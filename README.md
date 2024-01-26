@@ -211,11 +211,12 @@ sudo rpi-update
 
 - Configure system
     - `ssh jas@jas.local`
-    - `sudo apt -y install git`
+    - `sudo apt -y install git-all`
     - `git clone https://github.com/beautiful-orca/JAudioSync.git`
     - `cd JAudioSync`
     - `./install_pi.sh`
         - choose USB Audio or headphones
+        - choose RTc,GPS or fake clock 
     - optional push prepared Music folder: 
         - `exit` first
         - `sshpass -p secret scp -r ~/Music jas@jas.local:/home/jas/JAudioSync/Music`
