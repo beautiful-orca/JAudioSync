@@ -183,6 +183,9 @@ sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas1.local
     - `sshpass -p secret ssh -o StrictHostKeyChecking=no jas@jas0.local`
     - `tmux attach-session -t jas0`
 
+tmux new-session -d -s jas
+tmux send-keys -t jas "cd JAudioSync" C-m
+tmux send-keys -t jas "python3 JAudioSync.py" C-m
 
 
 
